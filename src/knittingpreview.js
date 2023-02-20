@@ -10,6 +10,14 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class KnittingPreview {
     constructor(element, pattern, colors, config = {}) {
+        image = new Image(maskWidth, maskHeight);
+        image.src = 'stitchOverlay6s.png';
+        image.onload = () => {
+            this.init(element, pattern, colors, config)
+        }
+    }
+
+    init(element, pattern, colors, config = {}) {
         config = Object.assign(
             {
                 createCanvas: createCanvas
@@ -183,6 +191,7 @@ function createPrerender(colors) {
 }
 
 let prerender = null;
+let image = null
 
 function drawCanvas(canvas, pattern, colors, repeatY) {
     if (prerender === null || prerender.colors !== colors) {
@@ -238,25 +247,9 @@ function prerenderCanvas(maskWidth, maskHeight, color) {
     canvas.width = maskWidth + 4;
     canvas.height = maskHeight + 4;
 
-    let left = 1 + 2;
-    let right = maskWidth - 1 + 2;
-    // Add a small overlap
-    let top = 2;
-    let bottom = maskHeight + 2;
-
     let ctx = canvas.getContext("2d");
 
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    ctx.strokeStyle = color;
-
-    ctx.beginPath();
-    ctx.moveTo(left, top);
-    ctx.lineTo((right + left) / 2, bottom);
-    ctx.lineTo(right, top);
-    ctx.stroke();
+    ctx.drawImage(image, 0, 0)
 
     return canvas;
 }
