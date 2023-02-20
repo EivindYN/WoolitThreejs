@@ -6,7 +6,7 @@ import * as THREE from 'three'
 //const THREE = require("three");
 
 import OrbitControls from "./orbitControls";
-import sweater_json from "./data/sweater.json";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class KnittingPreview {
     constructor(element, pattern, colors, config = {}) {
@@ -37,12 +37,15 @@ export class KnittingPreview {
             side: THREE.DoubleSide
         });
 
-        let loader = new THREE.JSONLoader();
-        this.sweater = loader.parse(sweater_json);
-        let mesh = new THREE.Mesh(this.sweater.geometry, this.material);
-        mesh.position.y = -200;
-        mesh.material = this.material;
-        this.scene.add(mesh);
+        let loader = new GLTFLoader();
+        loader.load("sweater.glb", (gltf) => {
+            let geometry = gltf.scene.children[0].geometry
+            let mesh = new THREE.Mesh(geometry, this.material);
+            mesh.position.y = 0
+            mesh.rotateX(Math.PI / 2.);
+            mesh.material = this.material;
+            this.scene.add(mesh);
+        });
 
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
@@ -51,7 +54,7 @@ export class KnittingPreview {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(1024, 1024, false);
 
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        //this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
         element.appendChild(this.renderer.domElement);
 
@@ -67,6 +70,7 @@ export class KnittingPreview {
             this.animate();
         });
     }
+
     resize(displayWidth, displayHeight) {
         if (!displayWidth) {
             displayWidth = this.renderer.domElement.parentNode.clientWidth;
@@ -86,6 +90,7 @@ export class KnittingPreview {
         }
         this.last_resize = new Date();
     }
+
     animate() {
         setTimeout(() => {
             requestAnimationFrame(() => this.animate());
