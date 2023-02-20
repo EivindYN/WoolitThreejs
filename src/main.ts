@@ -1,6 +1,8 @@
 // npm install three@0.98.0
 // Import * as THREE
 // Remove detector @ import and init
+// Import and export at https://raw.githack.com/mrdoob/three.js/r98/editor/index.html
+// Use GLTFLoader
 import { KnittingPreview } from "./knittingpreview";
 
 let pattern: number[][] = []

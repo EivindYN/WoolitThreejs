@@ -38,11 +38,9 @@ export class KnittingPreview {
         });
 
         let loader = new GLTFLoader();
-        loader.load("sweater.glb", (gltf) => {
+        loader.load("sweater.gltf", (gltf) => {
             let geometry = gltf.scene.children[0].geometry
             let mesh = new THREE.Mesh(geometry, this.material);
-            mesh.position.y = 0
-            mesh.rotateX(Math.PI / 2.);
             mesh.material = this.material;
             this.scene.add(mesh);
         });
