@@ -1,0 +1,30 @@
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	font: inherit;
+	padding: 0;
+	margin: 0;
+}
+
+html {
+	color-scheme: dark light;
+}
+
+body {
+	min-height: 100vh;
+}
+
+img,
+picture,
+svg,
+video,
+canvas {
+	display: block;
+	max-width: 100%;
+}
+
+.dragon_head {
+	position: absolute;
+	width: 10%;
+}
