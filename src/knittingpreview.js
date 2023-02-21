@@ -5,7 +5,7 @@ import * as THREE from 'three'
 //import Detector from "three/examples/js/Detector.js"; 
 //const THREE = require("three");
 
-import OrbitControls from "./orbitControls";
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class KnittingPreview {
@@ -50,6 +50,7 @@ export class KnittingPreview {
             let geometry = gltf.scene.children[0].geometry
             let mesh = new THREE.Mesh(geometry, this.material);
             mesh.material = this.material;
+            mesh.position.y = -200;
             this.scene.add(mesh);
         });
 
@@ -60,7 +61,7 @@ export class KnittingPreview {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(1024, 1024, false);
 
-        //this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
         element.appendChild(this.renderer.domElement);
 
