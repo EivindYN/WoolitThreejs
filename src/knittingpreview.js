@@ -46,7 +46,7 @@ export class KnittingPreview {
         });
 
         let loader = new GLTFLoader();
-        loader.load("sweater.gltf", (gltf) => {
+        loader.load("sweater2.gltf", (gltf) => {
             let geometry = gltf.scene.children[0].geometry
             let mesh = new THREE.Mesh(geometry, this.material);
             mesh.material = this.material;
