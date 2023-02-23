@@ -11,7 +11,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 export class KnittingPreview {
     constructor(element, pattern, colors, config = {}) {
         image = new Image(maskWidth, maskHeight);
-        image.src = 'stitchOverlay6s.png';
+        image.src = 'patterns2.png';
         image.onload = () => {
             this.init(element, pattern, colors, config)
         }
@@ -35,8 +35,9 @@ export class KnittingPreview {
         }*/
 
         this.camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 2000);
-        this.camera.position.z = 500;
-        this.camera.position.y = 200;
+        this.camera.position.z = 5;
+        this.camera.position.y = 5;
+        //camera.lookAt(0, 0, 0);
 
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xf8f5f2);
@@ -46,13 +47,31 @@ export class KnittingPreview {
         });
 
         let loader = new GLTFLoader();
-        loader.load("sweater2.gltf", (gltf) => {
+        loader.load("sweater_3.gltf", (gltf) => {
+            console.log(gltf.scene.children[0])
+            const texture = new THREE.TextureLoader().load('Diffuse_sweater_binocular2.png');
+            texture.flipY = false
+            const material = new THREE.MeshBasicMaterial({ map: texture });
             let geometry = gltf.scene.children[0].geometry
             let mesh = new THREE.Mesh(geometry, this.material);
-            mesh.material = this.material;
-            mesh.position.y = -200;
+            mesh.position.y = -1;
+            mesh.scale.set(5, 5, 5)
             this.scene.add(mesh);
+            /*
+            let model = gltf.scene.children[0]
+            model.traverse(o => {
+                if (o.isMesh) {
+                    const texture = new THREE.TextureLoader().load('Diffuse_sweater_binocular2.png');
+                    const material = new THREE.MeshBasicMaterial({ map: texture });
+                    o.material = material
+                }
+            });
+            this.scene.add(model)
+            */
         });
+
+        const light = new THREE.AmbientLight(0xFFFFFF); // soft white light
+        this.scene.add(light);
 
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
@@ -171,14 +190,14 @@ export class KnittingPreview {
 
 function createCanvas() {
     let canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 1024;
+    canvas.width = 1024 * 4;
+    canvas.height = 1024 * 4;
 
     return canvas;
 }
 
-let maskHeight = 7;
-let maskWidth = 8;
+let maskHeight = 7 * 4;
+let maskWidth = 8 * 4;
 
 function createPrerender(colors) {
     let canvases = colors.map(function (color) {
