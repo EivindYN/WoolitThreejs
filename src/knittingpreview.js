@@ -10,9 +10,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class KnittingPreview {
     constructor(element, pattern, colors, config = {}) {
-        image = new Image(maskWidth, maskHeight);
-        image.src = 'patterns2.png';
-        image.onload = () => {
+        image_base = new Image(maskWidth, maskHeight);
+        image_base.src = 'patterns2.png';
+        image_base.onload = () => {
+            color_to_image = {}
+            for (let color of colors) {
+                color_to_image[color] = image_base
+            }
             this.init(element, pattern, colors, config)
         }
     }
@@ -57,17 +61,6 @@ export class KnittingPreview {
             mesh.position.y = -1;
             mesh.scale.set(5, 5, 5)
             this.scene.add(mesh);
-            /*
-            let model = gltf.scene.children[0]
-            model.traverse(o => {
-                if (o.isMesh) {
-                    const texture = new THREE.TextureLoader().load('Diffuse_sweater_binocular2.png');
-                    const material = new THREE.MeshBasicMaterial({ map: texture });
-                    o.material = material
-                }
-            });
-            this.scene.add(model)
-            */
         });
 
         const light = new THREE.AmbientLight(0xFFFFFF); // soft white light
@@ -211,52 +204,46 @@ function createPrerender(colors) {
 }
 
 let prerender = null;
-let image = null
+let image_base = null;
+let color_to_image = null;
 
-function drawCanvas(canvas, pattern, colors, repeatY) {
+function drawCanvas(canvas, patterns, colors, repeatY) {
     if (prerender === null || prerender.colors !== colors) {
         prerender = createPrerender(colors);
     }
 
     let ctx = canvas.getContext("2d");
 
-    let patternHeight = pattern.length;
-    let patternWidth = pattern[0].length;
+    for (let pattern of patterns) {
+        let patternHeight = pattern.pattern.length;
+        let patternWidth = pattern.pattern[0].length;
 
-    let width = canvas.width;
-    let height = canvas.height;
+        let width = pattern.corner2X - pattern.corner1X;
+        let height = pattern.corner2Y - pattern.corner1Y;
 
-    ctx.fillStyle = "#333";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        let mask_n_x = Math.floor(width / maskWidth);
+        let mask_n_y = Math.floor(height / maskHeight);
 
-    let mask_n_x = Math.floor(width / maskWidth);
-    let mask_n_y = Math.floor(height / maskHeight);
-
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    ctx.strokeStyle = "blue";
-
-    for (let x = 0; x < mask_n_x; x++) {
-        for (let y = 0; y < mask_n_y; y++) {
-            let color;
-            let y_;
-            if (repeatY) {
-                y_ = y % patternHeight;
-            } else {
-                y_ = y;
+        for (let x = 0; x < mask_n_x; x++) {
+            for (let y = 0; y < mask_n_y; y++) {
+                let color;
+                let y_;
+                if (repeatY) {
+                    y_ = y % patternHeight;
+                } else {
+                    y_ = y;
+                }
+                if (pattern[y_]) {
+                    color = pattern[y_][x % patternWidth];
+                } else {
+                    color = 0;
+                }
+                ctx.drawImage(
+                    prerender.canvases[color],
+                    x * maskWidth + pattern.corner1X,
+                    canvas.height - (y * maskHeight + pattern.corner1Y)
+                );
             }
-            if (pattern[y_]) {
-                color = pattern[y_][x % patternWidth];
-            } else {
-                color = 0;
-            }
-            ctx.drawImage(
-                prerender.canvases[color],
-                x * maskWidth - 2,
-                y * maskHeight - 2
-            );
         }
     }
 }
@@ -269,7 +256,10 @@ function prerenderCanvas(maskWidth, maskHeight, color) {
 
     let ctx = canvas.getContext("2d");
 
-    ctx.drawImage(image, 0, 0)
+    console.log(color_to_image)
+    console.log(color)
+
+    ctx.drawImage(color_to_image[color], 0, 0)
 
     return canvas;
 }
