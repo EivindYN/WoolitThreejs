@@ -23,9 +23,11 @@ export class KnittingPreview {
     repeatY: boolean;
     prerender: { colors: any; canvases: any; } | null = null;
     image_base: HTMLImageElement;
-    color_to_image: { [x: string]: HTMLElement };
+    image_mask: HTMLImageElement;
+    color_to_image: { [x: string]: ImageData };
     maskHeight = 7 * 4;
     maskWidth = 8 * 4;
+    waitForLoad: HTMLImageElement[];
 
     constructor(element: HTMLElement, pattern: Pattern[], colors: string[]) {
         this.canvas = this.createCanvas();
@@ -42,18 +44,67 @@ export class KnittingPreview {
         this.last_resize = new Date();
         this.repeatY = false;
         this.color_to_image = {}
+        this.waitForLoad = []
 
         this.image_base = new Image(this.maskWidth, this.maskHeight);
         this.image_base.src = 'patterns2.png';
-        this.image_base.onload = () => {
-            for (let color of colors) {
-                this.color_to_image[color] = this.image_base!!
+        this.waitForLoad.push(this.image_base)
+
+        this.image_mask = new Image(this.maskWidth, this.maskHeight);
+        this.image_mask.src = 'patterns2c.png';
+        this.waitForLoad.push(this.image_mask)
+
+        for (let image of this.waitForLoad) {
+            image.onload = () => {
+                this.waitForLoad.pop()
+                if (this.waitForLoad.length === 0) {
+                    this.init(element, pattern, colors)
+                }
             }
-            this.init(element, pattern, colors)
         }
     }
 
+
+
     init(element: HTMLElement, pattern: Pattern[], colors: string[]) {
+        let ctx = this.canvas.getContext("2d")!!;
+        let colored_image_mask = this.image_mask!!
+        let w = this.maskWidth
+        let h = this.maskHeight
+        ctx.drawImage(colored_image_mask, 0, 0, w, h)
+        ctx.drawImage(colored_image_mask, 0, h, w, h)
+        let imageDataMask = ctx.getImageData(0, 0, w, h * 2)
+        for (let color of colors) {
+            let colored_image = this.image_base!!
+            ctx.drawImage(colored_image, 0, 0, w, h)
+            ctx.drawImage(colored_image, 0, h, w, h)
+            let imageData = ctx.getImageData(0, 0, w, h * 2)
+            ctx.fillStyle = color;
+            let rgb = this.hexToRgb(ctx.fillStyle)!!
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                let offset = 2
+                if (i > imageData.data.length / 2) {
+                    offset -= 2
+                }
+                let me = imageDataMask.data[i + offset] / 255.0
+                let background = imageDataMask.data[i + 1] / 255.0
+                let other = imageDataMask.data[i + (2 - offset)] / 255.0
+                let max = Math.max(me, background, other)
+                if (max === background) {
+                    max *= 0.5
+                    imageData.data[i + 3] = 100
+                }
+                else if (Math.max(me, other) === other) {
+                    imageData.data[i + 3] = 0
+                }
+                imageData.data[i] *= max * rgb.r / 255.0
+                imageData.data[i + 1] *= max * rgb.g / 255.0
+                imageData.data[i + 2] *= max * rgb.b / 255.0
+
+
+            }
+            this.color_to_image[color] = imageData
+        }
         this.colors = colors;
         this.pattern = pattern;
         this.drawCanvas(this.canvas, this.pattern, this.colors, this.repeatY);
@@ -200,7 +251,7 @@ export class KnittingPreview {
             let mask_n_y = Math.floor(height / this.maskHeight);
 
             for (let x = 0; x < mask_n_x; x++) {
-                for (let y = 0; y < mask_n_y; y++) {
+                for (let y = 0; y < mask_n_y; y += 1) {
                     let color;
                     let y_;
                     if (repeatY) {
@@ -215,27 +266,36 @@ export class KnittingPreview {
                     }
                     ctx.drawImage(
                         this.prerender.canvases[color],
-                        x * this.maskWidth + pattern.corner1X,
-                        y * this.maskHeight + pattern.corner1Y
+                        x * (this.maskWidth) + pattern.corner1X,
+                        y * (this.maskHeight) + pattern.corner1Y
                     );
                 }
             }
         }
     }
 
-    prerenderCanvas(maskWidth: number, maskHeight: number, color: string | number) {
+    prerenderCanvas(maskWidth: number, maskHeight: number, color: string) {
         let canvas = document.createElement("canvas");
 
-        canvas.width = maskWidth + 4;
-        canvas.height = maskHeight + 4;
+        canvas.width = maskWidth;
+        canvas.height = maskHeight * 2;
 
         let ctx = canvas.getContext("2d")!!;
 
         console.log(this.color_to_image)
         console.log(color)
 
-        ctx.drawImage(this.color_to_image!![color] as CanvasImageSource, 0, 0)
+        ctx.putImageData(this.color_to_image!![color], 0, 0)
 
         return canvas;
+    }
+
+    hexToRgb(hex: string) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
     }
 }

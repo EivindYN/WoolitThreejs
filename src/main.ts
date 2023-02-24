@@ -16,12 +16,8 @@ for (let y = 0; y < 146; y++) {
     }
 }
 let leftArm = new Pattern(pattern, 371, 60, 1714, 1732);
-let rightArm = new Pattern([], 2224, 52, 3548, 1700);
+//let rightArm = new Pattern([], 2224, 52, 3548, 1700);
 
-let element = document.getElementById('canvas')
+let element = document.getElementById('canvas')!!
 
-if (element === null) {
-    throw new Error('Could not get canvas')
-}
-
-new KnittingPreview(element, [leftArm], ['red', 'blue']);
+new KnittingPreview(element, [leftArm], ['red', 'white']);
