@@ -11,24 +11,28 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Pattern } from './pattern';
 
 export class KnittingPreview {
-    material: any;
-    scene: any;
-    canvas: any;
+    material: THREE.MeshBasicMaterial;
+    scene: THREE.Scene;
+    canvas: HTMLCanvasElement;
     colors: string[];
     pattern: Pattern[];
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
-    controls: any;
+    controls: OrbitControls;
     last_resize: Date;
-    sweater: any;
-    repeatY: any;
+    repeatY: boolean;
     prerender: { colors: any; canvases: any; } | null = null;
-    image_base: HTMLImageElement | null = null;
-    color_to_image: { [x: string]: HTMLElement } | null = null;
+    image_base: HTMLImageElement;
+    color_to_image: { [x: string]: HTMLElement };
     maskHeight = 7 * 4;
     maskWidth = 8 * 4;
 
     constructor(element: HTMLElement, pattern: Pattern[], colors: string[]) {
+        this.canvas = this.createCanvas();
+        this.material = new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide
+        });
+        this.scene = new THREE.Scene();
         this.colors = []
         this.pattern = []
         this.camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 2000);
@@ -36,11 +40,12 @@ export class KnittingPreview {
             antialias: true
         });
         this.last_resize = new Date();
+        this.repeatY = false;
+        this.color_to_image = {}
 
         this.image_base = new Image(this.maskWidth, this.maskHeight);
         this.image_base.src = 'patterns2.png';
         this.image_base.onload = () => {
-            this.color_to_image = {}
             for (let color of colors) {
                 this.color_to_image[color] = this.image_base!!
             }
@@ -49,7 +54,6 @@ export class KnittingPreview {
     }
 
     init(element: HTMLElement, pattern: Pattern[], colors: string[]) {
-        this.canvas = this.createCanvas();
         this.colors = colors;
         this.pattern = pattern;
         this.drawCanvas(this.canvas, this.pattern, this.colors, this.repeatY);
@@ -63,12 +67,7 @@ export class KnittingPreview {
         this.camera.position.y = 5;
         //camera.lookAt(0, 0, 0);
 
-        this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xf8f5f2);
-
-        this.material = new THREE.MeshBasicMaterial({
-            side: THREE.DoubleSide
-        });
 
         let loader = new GLTFLoader();
         loader.load("sweater_3.gltf", (gltf: { scene: { children: { geometry: any; }[]; }; }) => {
@@ -92,6 +91,7 @@ export class KnittingPreview {
 
         this.material.map = new THREE.Texture(this.canvas);
         this.material.map.wrapS = THREE.RepeatWrapping;
+        this.material.map.flipY = false;
 
         this.material.map.needsUpdate = true;
 
@@ -136,37 +136,7 @@ export class KnittingPreview {
         // TODO
     }
     getScreenshot() {
-        let width = 2000;
-        let height = 2000;
-        let camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 2000);
-        camera.position.z = 500;
-        camera.position.y = 200;
-        camera.lookAt(0, 0, 0);
-
-        let renderer = new THREE.WebGLRenderer({
-            antialias: true
-        });
-        renderer.setSize(width, height, false);
-
-        let scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff);
-        let mesh = new THREE.Mesh(
-            this.sweater.geometry,
-            new THREE.MeshBasicMaterial({
-                color: "#ff0000"
-            })
-        );
-        mesh.position.y = -200;
-        mesh.material = this.material;
-        scene.add(mesh);
-
-        renderer.render(scene, camera);
-
-        let res = renderer.domElement.toDataURL("image/png");
-
-        renderer.dispose();
-
-        return res;
+        // Removed for now
     }
     downloadPatternScreenshot() {
         var img = this.canvas.toDataURL("image/png");
@@ -176,7 +146,7 @@ export class KnittingPreview {
         if (this.canvas) {
             requestAnimationFrame(() => {
                 this.drawCanvas(this.canvas, this.pattern, this.colors, this.repeatY);
-                this.material.map.needsUpdate = true;
+                this.material.map!!.needsUpdate = true;
             });
         }
     }
@@ -212,7 +182,7 @@ export class KnittingPreview {
         };
     }
 
-    drawCanvas(canvas: { getContext: (arg0: string) => any; height: number; }, patterns: Pattern[], colors: any[], repeatY: undefined) {
+    drawCanvas(canvas: { getContext: (arg0: string) => any; height: number; }, patterns: Pattern[], colors: any[], repeatY: boolean) {
         if (this.prerender === null || this.prerender.colors !== colors) {
             this.prerender = this.createPrerender(colors);
         }
@@ -246,7 +216,7 @@ export class KnittingPreview {
                     ctx.drawImage(
                         this.prerender.canvases[color],
                         x * this.maskWidth + pattern.corner1X,
-                        canvas.height - (y * this.maskHeight + pattern.corner1Y)
+                        y * this.maskHeight + pattern.corner1Y
                     );
                 }
             }
