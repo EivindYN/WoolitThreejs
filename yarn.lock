@@ -7,6 +7,11 @@
   resolved "https://registry.npmjs.org/@types/dat.gui/-/dat.gui-0.7.7.tgz"
   integrity sha512-CxLCme0He5Jk3uQwfO/fGZMyNhb/ypANzqX0yU9lviBQMlen5SOvQTBQ/Cd9x5mFlUAK5Tk8RgvTyLj1nYkz+w==
 
+"@types/node@^18.14.1", "@types/node@>= 14":
+  version "18.14.1"
+  resolved "https://registry.npmjs.org/@types/node/-/node-18.14.1.tgz"
+  integrity sha512-QH+37Qds3E0eDlReeboBxfHbX9omAcBCXEzswCu6jySP642jiM3cYSIkU/REqwhCUqXdonHFuBfJDiAJxMNhaQ==
+
 "@types/three@^0.146.0":
   version "0.146.0"
   resolved "https://registry.npmjs.org/@types/three/-/three-0.146.0.tgz"
