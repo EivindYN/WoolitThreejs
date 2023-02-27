@@ -10,6 +10,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { Pattern } from './pattern';
 
+let pointer: THREE.Vector2;
+
 export class KnittingPreview {
     material: THREE.MeshBasicMaterial;
     scene: THREE.Scene;
@@ -28,6 +30,7 @@ export class KnittingPreview {
     maskHeight = 7 * 4;
     maskWidth = 8 * 4;
     waitForLoad: HTMLImageElement[];
+    raycaster = new THREE.Raycaster();
 
     constructor(element: HTMLElement, pattern: Pattern[], colors: string[]) {
         this.canvas = this.createCanvas();
@@ -91,7 +94,7 @@ export class KnittingPreview {
                 let other = imageDataMask.data[i + (2 - offset)] / 255.0
                 let max = Math.max(me, background, other)
                 if (max === background) {
-                    max *= 0.5
+                    max *= 0.75
                     imageData.data[i + 3] = 100
                 }
                 else if (Math.max(me, other) === other) {
@@ -148,6 +151,8 @@ export class KnittingPreview {
 
         this.renderer.render(this.scene, this.camera);
 
+        window.addEventListener('pointermove', this.onPointerMove);
+
         requestAnimationFrame(() => {
             this.resize();
             this.animate();
@@ -174,6 +179,37 @@ export class KnittingPreview {
         this.last_resize = new Date();
     }
 
+    onPointerMove(event: { clientX: number; clientY: number; }) {
+
+        // calculate pointer position in normalized device coordinates
+        // (-1 to +1) for both components
+
+        let x = ((event.clientX / window.innerWidth) * 2 - 1) * 2 - 1; //NB
+        let y = - (event.clientY / window.innerHeight) * 2 + 1
+        pointer = new THREE.Vector2(x, y)
+        console.log(pointer);
+    }
+
+    render() {
+        if (!pointer) {
+            return
+        }
+        // update the picking ray with the camera and pointer position
+        this.raycaster.setFromCamera(pointer, this.camera);
+
+        // calculate objects intersecting the picking ray
+        const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+        console.log(intersects.length)
+        for (let i = 0; i < intersects.length; i++) {
+
+            intersects[i].object.material.color.set(0xff0000);
+
+        }
+
+        this.renderer.render(this.scene, this.camera);
+
+    }
+
     animate() {
         setTimeout(() => {
             requestAnimationFrame(() => this.animate());
@@ -181,6 +217,7 @@ export class KnittingPreview {
         if (new Date().getTime() - this.last_resize.getTime() > 1000) {
             this.resize();
         }
+        this.render();
         this.renderer.render(this.scene, this.camera);
     }
     cleanup() {
