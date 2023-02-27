@@ -187,7 +187,6 @@ export class KnittingPreview {
         let x = ((event.clientX / window.innerWidth) * 2 - 1) * 2 - 1; //NB
         let y = - (event.clientY / window.innerHeight) * 2 + 1
         pointer = new THREE.Vector2(x, y)
-        console.log(pointer);
     }
 
     render() {
@@ -199,9 +198,10 @@ export class KnittingPreview {
 
         // calculate objects intersecting the picking ray
         const intersects = this.raycaster.intersectObjects(this.scene.children, false);
-        console.log(intersects.length)
         for (let i = 0; i < intersects.length; i++) {
+            let uv = intersects[i].uv!!;
 
+            console.log(uv)
             intersects[i].object.material.color.set(0xff0000);
 
         }
