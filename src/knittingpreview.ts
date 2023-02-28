@@ -38,9 +38,6 @@ export class KnittingPreview {
     maskWidth = 8 * 4;
     waitForLoad: HTMLImageElement[];
     raycaster = new THREE.Raycaster();
-    composer: EffectComposer;
-    renderPass: RenderPass;
-    outlinePass: OutlinePass;
     constructor(element: HTMLElement, pattern: Pattern[], colors: string[]) {
         this.canvas = this.createCanvas();
         this.material = new THREE.MeshPhongMaterial({
@@ -150,36 +147,13 @@ export class KnittingPreview {
             element.appendChild(this.canvas);
             return;
         }*/
-        this.composer = new EffectComposer(this.renderer);
-        this.renderPass = new RenderPass(this.scene, this.camera);
-        this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
-        this.outlinePass.overlayMaterial.blending = THREE.NormalBlending
-        this.composer.addPass(this.renderPass);
-        this.composer.addPass(this.outlinePass);
-
-        var params = {
-            edgeStrength: 20,
-            edgeGlow: 10,
-            edgeThickness: 10.0,
-            pulsePeriod: 0,
-            usePatternTexture: false
-        };
-
-        this.outlinePass.edgeStrength = params.edgeStrength;
-        this.outlinePass.edgeGlow = params.edgeGlow;
-        this.outlinePass.visibleEdgeColor.set(0xff0000);
-        this.outlinePass.hiddenEdgeColor.set(0xffffff);
 
         this.material.map = new THREE.Texture(this.canvas);
         this.material.map.wrapS = THREE.RepeatWrapping;
         this.material.map.flipY = false;
 
-        console.log(this.outlinePass)
 
         this.material.map.needsUpdate = true;
-
-        this.composer.render(this.scene, this.camera);
-        this.renderer.render(this.scene, this.camera);
 
         window.addEventListener('pointermove', this.onPointerMove);
 
@@ -238,16 +212,12 @@ export class KnittingPreview {
                 let insideY = uv.y < target.corner2Y && uv.y > target.corner1Y;
                 if (insideX && insideY) {
                     console.log(this.pattern[n].name)
-                    let selectedObjects = [];
-                    selectedObjects.push(intersects[i].object);
-                    this.outlinePass.selectedObjects = selectedObjects;
                 }
             }
             //intersects[i].object.material.color.set(0xff0000);
 
         }
         this.renderer.render(this.scene, this.camera);
-        this.composer.render(this.scene, this.camera)
 
     }
 
