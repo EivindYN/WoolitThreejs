@@ -1,4 +1,5 @@
 export class Pattern {
+    name: String
     pattern: number[][]
     corner1X: number
     corner1Y: number
@@ -7,7 +8,8 @@ export class Pattern {
     //corner1      corner
     //
     //corner       corner2
-    constructor(pattern: number[][], corner1X: number, corner1Y: number, corner2X: number, corner2Y: number) {
+    constructor(name: String, pattern: number[][], corner1X: number, corner1Y: number, corner2X: number, corner2Y: number) {
+        this.name = name
         this.pattern = pattern
         this.corner1X = corner1X
         this.corner1Y = corner1Y
