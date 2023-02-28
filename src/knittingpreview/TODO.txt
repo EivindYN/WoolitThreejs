@@ -1,0 +1,29 @@
+/*if (!Detector.webgl) {
+    // Backup for non-webgl-supporting browsers
+    element.appendChild(canvas);
+    return;
+}*/
+
+function cleanup() {
+    // TODO
+}
+function getScreenshot() {
+    // Removed for now
+}
+function downloadPatternScreenshot() {
+    var img = canvas.toDataURL("image/png");
+    document.write('<img src="' + img + '"/>');
+}
+
+function updatePattern(pattern_arg: Pattern[]) {
+    pattern = pattern_arg;
+    updateCanvas();
+}
+function updateColors(colors_arg: string[]) {
+    colors = colors_arg;
+    updateCanvas();
+}
+function setRepeatY(repeatY_arg: any) {
+    repeatY = repeatY_arg;
+    updateCanvas();
+}
