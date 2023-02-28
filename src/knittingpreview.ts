@@ -17,6 +17,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { Pattern } from './pattern';
 
 let pointer: THREE.Vector2;
+let selectedPatterns: Pattern[];
 
 
 export class KnittingPreview {
@@ -38,15 +39,20 @@ export class KnittingPreview {
     maskWidth = 8 * 4;
     waitForLoad: HTMLImageElement[];
     raycaster = new THREE.Raycaster();
-    selectedPatterns: Pattern[];
     constructor(element: HTMLElement, pattern: Pattern[], colors: string[]) {
         this.canvas = this.createCanvas();
         this.material = new THREE.MeshPhongMaterial({
             side: THREE.DoubleSide
         });
-        this.selectedPatterns = [];
+        selectedPatterns = [];
         this.scene = new THREE.Scene();
-        this.colors = colors
+        let colorsHex = []
+        let ctx = this.canvas.getContext("2d")!!;
+        for (let color of colors) {
+            ctx.fillStyle = color
+            colorsHex.push(ctx.fillStyle)
+        }
+        this.colors = colorsHex
         this.pattern = pattern
         this.camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 2000);
         this.renderer = new THREE.WebGLRenderer({
@@ -110,8 +116,7 @@ export class KnittingPreview {
         ctx.drawImage(colored_image, 0, 0, w, h)
         ctx.drawImage(colored_image, 0, h, w, h)
         let imageData = ctx.getImageData(0, 0, w, h * 2)
-        ctx.fillStyle = color;
-        let rgb = this.hexToRgb(ctx.fillStyle)!!
+        let rgb = this.hexToRgb(color)!!
         for (let i = 0; i < imageData.data.length; i += 4) {
             let offset = 2
             if (i > imageData.data.length / 2) {
@@ -164,6 +169,7 @@ export class KnittingPreview {
         this.material.map.needsUpdate = true;
 
         window.addEventListener('pointermove', this.onPointerMove);
+        window.addEventListener("click", this.onClick);
 
         requestAnimationFrame(() => {
             this.resize();
@@ -201,6 +207,10 @@ export class KnittingPreview {
         pointer = new THREE.Vector2(x, y)
     }
 
+    onClick(event: any) {
+        console.log(selectedPatterns)
+    }
+
     render() {
         if (!pointer) {
             return
@@ -210,18 +220,16 @@ export class KnittingPreview {
 
         // calculate objects intersecting the picking ray
         const intersects = this.raycaster.intersectObjects(this.scene.children, false);
-        this.selectedPatterns = []
+        selectedPatterns = []
         for (let i = 0; i < intersects.length; i++) {
             let uv = intersects[i].uv!!;
 
-            console.log(uv)
             for (let n = 0; n < this.pattern.length; n++) {
                 let target = this.pattern[n]
                 let insideX = uv.x < target.corner2X && uv.x > target.corner1X;
                 let insideY = uv.y < target.corner2Y && uv.y > target.corner1Y;
                 if (insideX && insideY) {
-                    console.log(this.pattern[n].name)
-                    this.selectedPatterns = [this.pattern[n]]
+                    selectedPatterns = [this.pattern[n]]
                 }
             }
             //intersects[i].object.material.color.set(0xff0000);
@@ -305,8 +313,6 @@ export class KnittingPreview {
             let patternHeight = pattern.pattern.length;
             let patternWidth = pattern.pattern[0].length;
 
-            console.log(pattern.corner1X)
-
             let width = (pattern.corner2X - pattern.corner1X) * canvas.width;
             let height = (pattern.corner2Y - pattern.corner1Y) * canvas.height;
 
@@ -327,7 +333,7 @@ export class KnittingPreview {
                     } else {
                         color = this.colors[0];
                     }
-                    if (this.selectedPatterns.includes(pattern)) {
+                    if (selectedPatterns.includes(pattern)) {
                         color = this.lighten_color(color)
                     }
                     ctx.drawImage(
@@ -348,16 +354,23 @@ export class KnittingPreview {
 
         let ctx = canvas.getContext("2d")!!;
 
-        console.log(this.color_to_image)
-        console.log(color)
-
         ctx.putImageData(this.color_to_image!![color], 0, 0)
 
         return canvas;
     }
 
     lighten_color(hex: string) {
-        return "#FFFFFF"
+        let color = this.hexToRgb(hex)!!
+        let colorLightened = {
+            r: 127 + color.r / 2,
+            g: 127 + color.g / 2,
+            b: 127 + color.b / 2
+        }
+        return this.rgbToHex(colorLightened)
+    }
+
+    rgbToHex(rgb: any) {
+        return "#" + (1 << 24 | rgb.r << 16 | rgb.g << 8 | rgb.b).toString(16).slice(1);
     }
 
     hexToRgb(hex: string) {
