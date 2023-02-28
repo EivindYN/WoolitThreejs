@@ -38,11 +38,13 @@ export class KnittingPreview {
     maskWidth = 8 * 4;
     waitForLoad: HTMLImageElement[];
     raycaster = new THREE.Raycaster();
+    selectedPatterns: Pattern[];
     constructor(element: HTMLElement, pattern: Pattern[], colors: string[]) {
         this.canvas = this.createCanvas();
         this.material = new THREE.MeshPhongMaterial({
             side: THREE.DoubleSide
         });
+        this.selectedPatterns = [];
         this.scene = new THREE.Scene();
         this.colors = colors
         this.pattern = pattern
@@ -100,7 +102,40 @@ export class KnittingPreview {
         }
     }
 
+    test(imageDataMask: any, color: string) {
+        let ctx = this.canvas.getContext("2d")!!;
+        let w = this.maskWidth
+        let h = this.maskHeight
+        let colored_image = this.image_base!!
+        ctx.drawImage(colored_image, 0, 0, w, h)
+        ctx.drawImage(colored_image, 0, h, w, h)
+        let imageData = ctx.getImageData(0, 0, w, h * 2)
+        ctx.fillStyle = color;
+        let rgb = this.hexToRgb(ctx.fillStyle)!!
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            let offset = 2
+            if (i > imageData.data.length / 2) {
+                offset -= 2
+            }
+            let me = imageDataMask.data[i + offset] / 255.0
+            let background = imageDataMask.data[i + 1] / 255.0
+            let other = imageDataMask.data[i + (2 - offset)] / 255.0
+            let max = Math.max(me, background, other)
+            if (max === background) {
+                max *= 0.75
+                imageData.data[i + 3] = 100
+            }
+            else if (Math.max(me, other) === other) {
+                imageData.data[i + 3] = 0
+            }
+            imageData.data[i] *= max * rgb.r / 255.0
+            imageData.data[i + 1] *= max * rgb.g / 255.0
+            imageData.data[i + 2] *= max * rgb.b / 255.0
 
+
+        }
+        this.color_to_image[color] = imageData
+    }
 
     renderAfterLoad() {
         let ctx = this.canvas.getContext("2d")!!;
@@ -111,35 +146,8 @@ export class KnittingPreview {
         ctx.drawImage(colored_image_mask, 0, h, w, h)
         let imageDataMask = ctx.getImageData(0, 0, w, h * 2)
         for (let color of this.colors) {
-            let colored_image = this.image_base!!
-            ctx.drawImage(colored_image, 0, 0, w, h)
-            ctx.drawImage(colored_image, 0, h, w, h)
-            let imageData = ctx.getImageData(0, 0, w, h * 2)
-            ctx.fillStyle = color;
-            let rgb = this.hexToRgb(ctx.fillStyle)!!
-            for (let i = 0; i < imageData.data.length; i += 4) {
-                let offset = 2
-                if (i > imageData.data.length / 2) {
-                    offset -= 2
-                }
-                let me = imageDataMask.data[i + offset] / 255.0
-                let background = imageDataMask.data[i + 1] / 255.0
-                let other = imageDataMask.data[i + (2 - offset)] / 255.0
-                let max = Math.max(me, background, other)
-                if (max === background) {
-                    max *= 0.75
-                    imageData.data[i + 3] = 100
-                }
-                else if (Math.max(me, other) === other) {
-                    imageData.data[i + 3] = 0
-                }
-                imageData.data[i] *= max * rgb.r / 255.0
-                imageData.data[i + 1] *= max * rgb.g / 255.0
-                imageData.data[i + 2] *= max * rgb.b / 255.0
-
-
-            }
-            this.color_to_image[color] = imageData
+            this.test(imageDataMask, color)
+            this.test(imageDataMask, this.lighten_color(color))
         }
         this.drawCanvas(this.canvas, this.pattern, this.colors, this.repeatY);
         /*if (!Detector.webgl) {
@@ -202,6 +210,7 @@ export class KnittingPreview {
 
         // calculate objects intersecting the picking ray
         const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+        this.selectedPatterns = []
         for (let i = 0; i < intersects.length; i++) {
             let uv = intersects[i].uv!!;
 
@@ -212,11 +221,12 @@ export class KnittingPreview {
                 let insideY = uv.y < target.corner2Y && uv.y > target.corner1Y;
                 if (insideX && insideY) {
                     console.log(this.pattern[n].name)
+                    this.selectedPatterns = [this.pattern[n]]
                 }
             }
             //intersects[i].object.material.color.set(0xff0000);
-
         }
+        this.updateCanvas()
         this.renderer.render(this.scene, this.camera);
 
     }
@@ -271,9 +281,12 @@ export class KnittingPreview {
     }
 
     createPrerender(colors: any[]) {
-        let canvases = colors.map((color) => {
-            return this.prerenderCanvas(this.maskWidth, this.maskHeight, color);
-        });
+        let canvases: any = {}
+        for (let colorIndex in colors) {
+            let color = colors[colorIndex]
+            canvases[color] = this.prerenderCanvas(this.maskWidth, this.maskHeight, color)
+            canvases[this.lighten_color(color)] = this.prerenderCanvas(this.maskWidth, this.maskHeight, this.lighten_color(color))
+        }
 
         return {
             canvases,
@@ -310,9 +323,12 @@ export class KnittingPreview {
                         y_ = y;
                     }
                     if (pattern.pattern[y_]) {
-                        color = pattern.pattern[y_][x % patternWidth];
+                        color = this.colors[pattern.pattern[y_][x % patternWidth]];
                     } else {
-                        color = 0;
+                        color = this.colors[0];
+                    }
+                    if (this.selectedPatterns.includes(pattern)) {
+                        color = this.lighten_color(color)
                     }
                     ctx.drawImage(
                         this.prerender.canvases[color],
@@ -338,6 +354,10 @@ export class KnittingPreview {
         ctx.putImageData(this.color_to_image!![color], 0, 0)
 
         return canvas;
+    }
+
+    lighten_color(hex: string) {
+        return "#FFFFFF"
     }
 
     hexToRgb(hex: string) {
