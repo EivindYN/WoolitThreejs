@@ -1,0 +1,31 @@
+button {
+  height: 50px;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  margin: 10px;
+}
+
+button,
+.box {
+  border-radius: 10px;
+}
+
+button,
+.box,
+.grid,
+.bordered {
+  border-color: gray;
+  border-style: solid;
+}
+
+.grid {
+  height: 25px;
+  width: 25px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
