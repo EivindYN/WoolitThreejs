@@ -3,7 +3,7 @@
 // Remove detector @ import and init
 // Import and export at https://raw.githack.com/mrdoob/three.js/r98/editor/index.html
 // Use GLTFLoader
-import { main } from "./knittingpreview/knittingpreview";
+import { make_preview } from "./knittingpreview/knittingpreview";
 import { Pattern } from "./pattern";
 
 
@@ -20,4 +20,4 @@ let leftArm = new Pattern("leftArm", pattern, 371 / 4096, 60 / 4096, 1714 / 4096
 
 let element = document.getElementById('canvas')!!
 
-main(element, [leftArm], ['red', 'white']);
+make_preview(element, [leftArm], ['red', 'white']);

@@ -36,7 +36,7 @@ let waitForLoad: HTMLImageElement[];
 let raycaster = new THREE.Raycaster();
 
 
-export function main(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[]) {
+export function make_preview(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[]) {
     canvas = createCanvas();
     material = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide
