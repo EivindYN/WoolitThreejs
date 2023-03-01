@@ -6,18 +6,10 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 // @ts-ignore
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-// @ts-ignore
-import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
-// @ts-ignore
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-// @ts-ignore
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 
 //import Detector from "three/examples/js/Detector.js"; 
 
-import { Pattern } from '../pattern';
-// @ts-ignore
-import { hexToRgb, lighten_color } from './colorutil.ts'
+import { Pattern } from './pattern';
 // @ts-ignore
 import { createCanvas, loadImages, renderAfterLoad, drawCanvas } from './texturecanvas';
 
@@ -25,7 +17,7 @@ let pointer: THREE.Vector2;
 let selectedPatterns: Pattern[];
 let material: THREE.MeshBasicMaterial;
 let scene: THREE.Scene;
-let canvas: HTMLCanvasElement;
+let texture_canvas: HTMLCanvasElement;
 let colors: string[];
 let pattern: Pattern[];
 let camera: THREE.PerspectiveCamera;
@@ -36,15 +28,15 @@ let waitForLoad: HTMLImageElement[];
 let raycaster = new THREE.Raycaster();
 
 
-export function make_preview(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[]) {
-    canvas = createCanvas();
+export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[]) {
+    texture_canvas = createCanvas();
     material = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide
     });
     selectedPatterns = [];
     scene = new THREE.Scene();
     let colorsHex = []
-    let ctx = canvas.getContext("2d")!!;
+    let ctx = texture_canvas.getContext("2d")!!;
     for (let color of colors_arg) {
         ctx.fillStyle = color
         colorsHex.push(ctx.fillStyle)
@@ -84,7 +76,7 @@ export function make_preview(element: HTMLElement, pattern_arg: Pattern[], color
 
     element.appendChild(renderer.domElement);
 
-    material.map = new THREE.Texture(canvas);
+    material.map = new THREE.Texture(texture_canvas);
     material.map.wrapS = THREE.RepeatWrapping;
     material.map.flipY = false;
 
@@ -105,8 +97,8 @@ export function make_preview(element: HTMLElement, pattern_arg: Pattern[], color
         image.onload = () => {
             waitForLoad.pop()
             if (waitForLoad.length === 0) {
-                renderAfterLoad(canvas, colors)
-                drawCanvas(canvas, pattern, colors, repeatY, selectedPatterns);
+                renderAfterLoad(texture_canvas, colors)
+                drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPatterns);
             }
         }
     }
@@ -120,7 +112,7 @@ function resize() {
     let displayWidth = (renderer.domElement.parentNode as HTMLElement).clientWidth;
     let displayHeight = (renderer.domElement.parentNode as HTMLElement).clientHeight;
 
-    // Check if the canvas is not the same size.
+    // Check if the texture_canvas is not the same size.
     if (
         renderer.domElement.width != displayWidth ||
         renderer.domElement.height != displayHeight
@@ -186,9 +178,9 @@ function animate() {
 }
 
 function updateCanvas() {
-    if (canvas) {
+    if (texture_canvas) {
         requestAnimationFrame(() => {
-            drawCanvas(canvas, pattern, colors, repeatY, selectedPatterns);
+            drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPatterns);
             material.map!!.needsUpdate = true;
         });
     }

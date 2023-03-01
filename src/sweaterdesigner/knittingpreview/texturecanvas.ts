@@ -1,6 +1,6 @@
 // @ts-ignore
 import { hexToRgb, lighten_color } from './colorutil.ts'
-import { Pattern } from '../pattern';
+import { Pattern } from './pattern';
 
 let prerender: { canvases: any; } | null = null;
 let maskHeight = 7 * 4;
