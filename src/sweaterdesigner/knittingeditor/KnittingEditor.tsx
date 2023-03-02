@@ -18,7 +18,7 @@ function KnittingEditor(props: any) {
     return (
         <div style={{ height: "100vh", minWidth: "50%", backgroundColor: "#f9f5f2", maxWidth: "50%" }}>
             <div style={{ display: "flex" }}>
-                <button style={{ marginRight: "0px" }}>
+                <button style={{ marginRight: "0px" }} onClick={() => console.log("hi")}>
                     <img src="brush.png" style={{ width: "30px" }}></img>
                 </button>
                 <button style={{ marginRight: "0px", borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}>

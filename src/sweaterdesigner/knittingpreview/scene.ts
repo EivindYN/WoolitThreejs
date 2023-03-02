@@ -137,7 +137,8 @@ function onPointerMove(event: { clientX: number; clientY: number; }) {
 }
 
 function onClick(_: any) {
-    setSelectedPattern(selectedPatterns[0])
+    if (pointer.x > -1) //NB
+        setSelectedPattern(selectedPatterns[0])
 }
 
 function render() {
