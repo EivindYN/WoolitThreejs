@@ -39,15 +39,24 @@ function onLoadImages(pattern: any, grid: any, setGrid: any) {
     let endX = pattern.corner2X * 4096
     let endY = pattern.corner2Y * 4096
     let shallow_grid = [...grid]
-    let xIndex = 0
-    for (let x = startX; x < endX; x += maskWidth) {
+    let xIndex = 10
+    let scaleX = 4096 / canvasWidth
+    let scaleY = 4096 / canvasHeight
+    for (let xFloat = startX; xFloat < endX; xFloat += maskWidth * scaleX) {
         let yIndex = 0
-        for (let y = startY; y < endY; y += maskHeight) {
-            if (pixelData(imageData, x, y) >= 128) {
-                if (yIndex < 300 && xIndex < 300) {
-                    console.log("attemp")
-                    shallow_grid[yIndex][xIndex] = 1
-                }
+        for (let yFloat = startY; yFloat < endY; yFloat += maskHeight * scaleY) {
+            let x = Math.round(xFloat)
+            let y = Math.round(yFloat)
+            //x and y have to be scaled if canvas.width != 4096
+            let NW = pixelData(imageData, x, y) >= 128
+            let NE = pixelData(imageData, x + maskWidth, y) >= 128
+            let SW = pixelData(imageData, x, y + maskHeight) >= 128
+            let SE = pixelData(imageData, x + maskWidth, y + maskHeight) >= 128
+            if (NW && NE && SW && SE) { //Do four corner checks, and adjust output depending
+                console.log("attemp")
+                shallow_grid[yIndex][xIndex] = 1
+                console.log(xIndex)
+                console.log(yIndex)
             }
             yIndex++;
         }

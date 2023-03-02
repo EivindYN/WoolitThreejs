@@ -6,7 +6,7 @@ import { loadGrid } from './gridcanvas';
 
 function KnittingEditor(props: any) {
 
-    const [grid, setGrid] = useState(new Array(300).fill(0).map(() => new Array(300).fill(0)));
+    const [grid, setGrid] = useState(new Array(90).fill(0).map(() => new Array(90).fill(0)));
 
     useEffect(() => {
         if (!props.selectedPattern) return
