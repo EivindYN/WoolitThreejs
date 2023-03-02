@@ -10,6 +10,10 @@ let canvasHeight = settings.canvasHeight
 
 let shirt_uv: HTMLImageElement
 
+export let state = {
+    selectedTilePos: [] as number[]
+}
+
 function loadImages() {
     let waitForLoad = []
 
@@ -27,7 +31,11 @@ function pixelData(imageData: any, x: number, y: number) {
     return (imageData.data[index])
 }
 
-function onLoadImages(pattern: any, grid: any, setGrid: any) {
+function distance(num1: number, num2: number) {
+    return Math.abs(num1 - num2)
+}
+
+export function onLoadImages(pattern: any, grid: any, setGrid: any) {
     let canvas: HTMLCanvasElement = document.createElement("canvas");
     canvas.width = 4096;
     canvas.height = 4096;
@@ -53,10 +61,13 @@ function onLoadImages(pattern: any, grid: any, setGrid: any) {
             let SW = pixelData(imageData, x, y + maskHeight) >= 128
             let SE = pixelData(imageData, x + maskWidth, y + maskHeight) >= 128
             if (NW && NE && SW && SE) { //Do four corner checks, and adjust output depending
-                console.log("attemp")
-                shallow_grid[yIndex][xIndex] = 1
-                console.log(xIndex)
-                console.log(yIndex)
+                let selectedX = state.selectedTilePos[0]
+                let selectedY = state.selectedTilePos[1]
+                if (distance(selectedX, xIndex) <= 1 && distance(selectedY, yIndex) <= 1) {
+                    shallow_grid[yIndex][xIndex] = 2
+                } else {
+                    shallow_grid[yIndex][xIndex] = 1
+                }
             }
             yIndex++;
         }

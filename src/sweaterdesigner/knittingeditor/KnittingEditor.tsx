@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useEffect, useState } from 'react'
 import { Settings } from '../settings'
-import { loadGrid } from './gridcanvas';
+import { loadGrid, state, onLoadImages } from './gridcanvas';
 
 function KnittingEditor(props: any) {
 
@@ -11,6 +11,7 @@ function KnittingEditor(props: any) {
     }
 
     const [grid, setGrid] = useState(make2DArray(90, 90));
+    const [hoveredTile, setHoveredTile] = useState<number[]>([])
     const [brush, setBrush] = useState(undefined)
     const [showBrushPopup, setShowBrushPopup] = useState(false)
 
@@ -19,7 +20,16 @@ function KnittingEditor(props: any) {
         loadGrid(props.selectedPattern, grid, setGrid)
     }, [props.selectedPattern]);
 
-    const colors = ["white", "black"]
+    //NB expensive
+    useEffect(() => {
+        if (!props.selectedPattern) return;
+        if (hoveredTile.length === 0) return;
+        state.selectedTilePos = hoveredTile
+        onLoadImages(props.selectedPattern, grid, setGrid)
+
+    }, [hoveredTile]);
+
+    const colors = ["white", "black", "gray"]
 
     return (
         <div style={{ height: "100vh", minWidth: "50%", backgroundColor: "#f9f5f2", maxWidth: "50%" }}>
@@ -61,7 +71,7 @@ function KnittingEditor(props: any) {
                     {grid.map((gridY, y) =>
                         <div style={{ display: "flex" }} key={y}>
                             {gridY.map((colorIndex, x) =>
-                                <div className="grid" style={{ backgroundColor: colors[colorIndex] }} key={x + "," + y}></div>
+                                <div className="grid" onMouseOver={() => setHoveredTile([x, y])} style={{ backgroundColor: colors[colorIndex] }} key={x + "," + y}></div>
                             )}
                         </div>
                     )}
