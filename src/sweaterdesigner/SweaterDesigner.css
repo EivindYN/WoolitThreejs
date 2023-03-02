@@ -8,6 +8,10 @@ button {
   margin: 10px;
 }
 
+hr {
+  border: 0.5px solid rgb(128, 128, 128);
+}
+
 /* Darker background on mouse-over */
 button:hover {
   background-color: RoyalBlue;
