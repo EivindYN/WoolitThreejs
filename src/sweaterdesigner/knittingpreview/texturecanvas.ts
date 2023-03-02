@@ -1,10 +1,15 @@
 // @ts-ignore
 import { hexToRgb, lighten_color } from './colorutil.ts'
-import { Pattern } from './pattern';
+import { Pattern } from '../pattern';
+import { Settings } from '../settings'
+
+let settings = new Settings()
+let maskWidth = settings.maskWidth
+let maskHeight = settings.maskHeight
+let canvasWidth = settings.canvasWidth
+let canvasHeight = settings.canvasHeight
 
 let prerender: { canvases: any; } | null = null;
-let maskHeight = 7 * 4;
-let maskWidth = 8 * 4;
 
 let image_base: HTMLImageElement;
 let image_mask: HTMLImageElement;
@@ -27,8 +32,8 @@ export function loadImages() {
 
 export function createCanvas() {
     let canvas = document.createElement("canvas");
-    canvas.width = 1024 * 4;
-    canvas.height = 1024 * 4;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
 
     return canvas;
 }
@@ -109,7 +114,7 @@ export function prerenderCanvas(maskWidth: number, maskHeight: number, color: st
     return canvas;
 }
 
-function color_image_mask(canvas: any, imageDataMask: any, color: string) {
+function color_image_mask(canvas: HTMLCanvasElement, imageDataMask: any, color: string) {
     let ctx = canvas.getContext("2d")!!;
     let w = maskWidth
     let h = maskHeight

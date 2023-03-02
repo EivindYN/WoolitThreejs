@@ -23,7 +23,8 @@ button,
 
 .grid {
   height: 25px;
-  width: 25px;
+  min-width: 25px;
+  max-width: 25px;
 }
 
 body {

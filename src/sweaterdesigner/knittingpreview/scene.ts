@@ -9,7 +9,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 //import Detector from "three/examples/js/Detector.js"; 
 
-import { Pattern } from './pattern';
+import { Pattern } from '../pattern';
 // @ts-ignore
 import { createCanvas, loadImages, renderAfterLoad, drawCanvas } from './texturecanvas';
 
@@ -26,9 +26,11 @@ let last_resize: Date;
 let repeatY: boolean;
 let waitForLoad: HTMLImageElement[];
 let raycaster = new THREE.Raycaster();
+let setSelectedPattern: any;
 
 
-export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[]) {
+export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[], setSelectedPattern_arg: any) {
+    setSelectedPattern = setSelectedPattern_arg
     texture_canvas = createCanvas();
     material = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide
@@ -134,9 +136,8 @@ function onPointerMove(event: { clientX: number; clientY: number; }) {
     pointer = new THREE.Vector2(x, y)
 }
 
-function onClick(event: any) {
-    console.log(event)
-    console.log(selectedPatterns)
+function onClick(_: any) {
+    setSelectedPattern(selectedPatterns[0])
 }
 
 function render() {
