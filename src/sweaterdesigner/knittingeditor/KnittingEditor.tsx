@@ -15,6 +15,18 @@ function KnittingEditor(props: any) {
     const [brush, setBrush] = useState(undefined)
     const [showBrushPopup, setShowBrushPopup] = useState(false)
 
+    let brushImg: HTMLElement | null;
+
+    /*useEffect(() => {
+        brushImg = document.getElementById('brush')
+        window.addEventListener('pointermove', onPointerMove);
+    }, [])
+
+    function onPointerMove(event: { clientX: number; clientY: number; }) {
+        brushImg!!.style.marginLeft = event.clientX + "px"
+        brushImg!!.style.marginTop = event.clientY + "px"
+    }*/
+
     useEffect(() => {
         if (!props.selectedPattern) return
         loadGrid(props.selectedPattern, grid, setGrid)
@@ -57,6 +69,9 @@ function KnittingEditor(props: any) {
                     </div>
                 </div>
             }
+            {/*<div id='brush' style={{ position: "absolute" }}>
+                <img src="brush.png" style={{ width: "30px" }}></img>
+        </div>*/}
             <div style={{ display: "flex" }}>
                 <button style={{ marginRight: "0px" }} onClick={() => setShowBrushPopup(true)}>
                     <img src="brush.png" style={{ width: "30px" }}></img>
