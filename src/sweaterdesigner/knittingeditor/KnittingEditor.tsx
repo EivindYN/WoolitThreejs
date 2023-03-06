@@ -42,8 +42,8 @@ function KnittingEditor(props: any) {
         while (pos.length > 0) {
             let startX = lastPos[0]
             let startY = lastPos[1]
-            let endX = pos[pos.length - 1][0]
-            let endY = pos[pos.length - 1][1]
+            let endX = pos[0][0]
+            let endY = pos[0][1]
             let numDraw = Math.max(Math.abs(endY - startY), Math.abs(endX - startX))
             for (let n = 0; n < numDraw; n++) {
                 let x = startX + Math.round((endX - startX) * n / numDraw)
@@ -51,7 +51,7 @@ function KnittingEditor(props: any) {
                 lastPos = [x, y]
                 drawSelection(props.selectedPattern, x, y)
             }
-            pos.pop()
+            pos.shift()
         }
         setGrid(getGrid())
         if (posUpdated)
