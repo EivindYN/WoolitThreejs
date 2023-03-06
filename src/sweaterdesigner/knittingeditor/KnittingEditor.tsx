@@ -50,7 +50,7 @@ function KnittingEditor(props: any) {
         loadGrid(props.selectedPattern, setGrid)
     }, [props.selectedPattern]);
 
-    const colors = ["white", "black", "gray"]
+    const colors = ["white", "red", "black"]
 
     return (
         <div style={{ height: "100vh", minWidth: "50%", backgroundColor: "#f9f5f2", maxWidth: "50%" }}>

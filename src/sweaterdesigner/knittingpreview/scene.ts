@@ -28,6 +28,7 @@ let waitForLoad: HTMLImageElement[];
 let raycaster = new THREE.Raycaster();
 let setSelectedPattern: any;
 
+let hasMoved: boolean
 
 export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[], setSelectedPattern_arg: any) {
     setSelectedPattern = setSelectedPattern_arg
@@ -60,7 +61,6 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
 
     let loader = new GLTFLoader();
     loader.load("sweater_3.gltf", (gltf: { scene: { children: { geometry: any; }[]; }; }) => {
-        console.log(gltf.scene.children[0])
         let geometry = gltf.scene.children[0].geometry
         let mesh = new THREE.Mesh(geometry, material);
         mesh.position.y = -1;
@@ -86,7 +86,8 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
     material.map.needsUpdate = true;
 
     window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener("click", onClick);
+    window.addEventListener("mousedown", () => { hasMoved = false })
+    window.addEventListener("mouseup", onClick)
 
     requestAnimationFrame(() => {
         resize();
@@ -134,10 +135,11 @@ function onPointerMove(event: { clientX: number; clientY: number; }) {
     let x = ((event.clientX / window.innerWidth) * 2 - 1) * 2 - 1; //NB
     let y = - (event.clientY / window.innerHeight) * 2 + 1
     pointer = new THREE.Vector2(x, y)
+    hasMoved = true
 }
 
 function onClick(_: any) {
-    if (pointer.x > -1) { //NB
+    if (!hasMoved && pointer.x > -1) { //NB
         setSelectedPattern(selectedPatterns[0])
     }
 }

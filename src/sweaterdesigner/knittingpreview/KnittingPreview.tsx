@@ -19,7 +19,7 @@ function KnittingPreview(props: any) {
 
         let element = document.getElementById('canvas')!!
 
-        makeScene(element, [leftArm], ['red', 'white'], props.setSelectedPattern);
+        makeScene(element, [leftArm], ['white', 'red', 'black'], props.setSelectedPattern);
     }
 
     useEffect(() => {

@@ -121,12 +121,11 @@ function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number
             let NE = pixelData(imageData, xPixel + maskWidth, yPixel) >= 128
             let SW = pixelData(imageData, xPixel, yPixel + maskHeight) >= 128
             let SE = pixelData(imageData, xPixel + maskWidth, yPixel + maskHeight) >= 128
-            if (NW && NE && SW && SE) { //Do four corner checks, and adjust output depending
+            if (NW || NE || SW || SE) { //Do four corner checks, and adjust output depending
                 if (isSelected) {
-                    grid[y][x] = 2
-                } else {
-                    grid[y][x] = 1
+                    pattern.pattern[y - dy][x - dx] = 2
                 }
+                grid[y][x] = pattern.pattern[y - dy][x - dx]
             }
         }
     }
