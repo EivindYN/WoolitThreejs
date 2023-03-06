@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useEffect, useState } from 'react'
 import { Settings } from '../settings'
-import { loadGrid, state, onLoadImages, drawSelection } from './gridcanvas';
+import { loadGrid, state, onLoadImages, drawSelection, getGrid } from './gridcanvas';
 
 let pos: number[][] = []
 let lastPos: number[] = []
@@ -30,10 +30,9 @@ function KnittingEditor(props: any) {
         brushImg!!.style.marginTop = event.clientY + "px"
     }
 
-    function onMouseOver(e: any, x: any, y: any) {
-        if (!e) return
+    function onMouseOver(x: any, y: any) {
         if (!props.selectedPattern) return;
-        if (lastPos.length == 0) lastPos = [x, y]
+        console.log("push: " + x + "," + y)
         pos.push([x, y]) //NB
         if (!posUpdated)
             setPosUpdated(true)
@@ -52,19 +51,18 @@ function KnittingEditor(props: any) {
                 let y = startY + Math.round((endY - startY) * n / numDraw)
                 lastPos = [x, y]
                 console.log(x, y)
-                drawSelection(props.selectedPattern, grid, setGrid, x, y)
+                drawSelection(props.selectedPattern, x, y)
             }
             pos.pop()
         }
+        setGrid(getGrid())
         if (posUpdated)
             setPosUpdated(false)
     }, [posUpdated])
 
     useEffect(() => {
         if (!props.selectedPattern) return
-        loadGrid(props.selectedPattern, grid, setGrid)
-        //let newGrid = getGrid()
-        //setGrid([...newGrid])
+        loadGrid(props.selectedPattern, setGrid)
     }, [props.selectedPattern]);
 
     const colors = ["white", "black", "gray"]
@@ -114,15 +112,17 @@ function KnittingEditor(props: any) {
                             {gridY.map((colorIndex, x) =>
                                 <div className="grid"
                                     onMouseDown={(e) => {
-                                        onMouseOver(true, x, y)
+                                        lastPos = [x, y]
+                                        onMouseOver(x, y)
                                     }}
                                     onMouseUp={(e) => {
-                                        onMouseOver(true, x, y)
+                                        onMouseOver(x, y)
                                     }}
                                     onMouseOver={(e: any) => {
                                         let flags = e.buttons !== undefined ? e.buttons : e.which;
                                         let primaryMouseButtonDown = (flags & 1) === 1;
-                                        onMouseOver(primaryMouseButtonDown, x, y)
+                                        if (primaryMouseButtonDown)
+                                            onMouseOver(x, y)
                                     }}
                                     style={{ backgroundColor: colors[colorIndex] }} key={x + "," + y}></div>
                             )}

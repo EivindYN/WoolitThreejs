@@ -9,12 +9,21 @@ let canvasWidth = settings.canvasWidth
 let canvasHeight = settings.canvasHeight
 
 let shirt_uv: HTMLImageElement
+let isSetup: Boolean = false
 
-/*function make2DArray(x: number, y: number) {
+function make2DArray(x: number, y: number) {
     return new Array(y).fill(0).map(() => new Array(x).fill(0))
 }
 
-let grid: any[][] = make2DArray(90, 90)*/
+let grid: any[][] = make2DArray(90, 90)
+
+export function getGrid() {
+    let shallowGrid = []
+    for (let gridIn of grid) {
+        shallowGrid.push([...gridIn])
+    }
+    return shallowGrid
+}
 
 export let state = {
     selectedTilePos: [] as number[]
@@ -41,46 +50,62 @@ function distance(num1: number, num2: number) {
     return Math.abs(num1 - num2)
 }
 
-export function drawSelection(pattern: any, grid: any, setGrid: any, x: any, y: any) {
+export function drawSelection(pattern: any, x: any, y: any) {
     let selectedX = x
     let selectedY = y
-    draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
+    draw(pattern, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
 }
 
-/*export function addSelection(pattern: any, grid: any, setGrid: any, x: any, y: any) {
+/*export function addSelection(pattern: any, x: any, y: any) {
     let selectedX = x
     let selectedY = y
-    draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
+    draw(pattern, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
 }
 
-/*export function removeSelection(pattern: any, grid: any, setGrid: any) {
+/*export function removeSelection(pattern: any) {
     let selectedX = state.selectedTilePos[0]
     let selectedY = state.selectedTilePos[1]
     let temp = [...state.selectedTilePos]
     state.selectedTilePos = [-999, -999]
-    draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2)
+    draw(pattern, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2)
     state.selectedTilePos = [...temp]
 }*/
+let dx: any
+let dy: any
 
-function draw(pattern: any, grid: any, setGrid: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
-    let dx = 10
-    let dy = 0
-    let startXPixel = pattern.corner1X * 4096
-    let startYPixel = pattern.corner1Y * 4096
-    let endXPixel = pattern.corner2X * 4096
-    let endYPixel = pattern.corner2Y * 4096
-    let scaleX = 4096 / canvasWidth
-    let scaleY = 4096 / canvasHeight
-    let sizeX = Math.ceil((endXPixel - startXPixel) / (maskWidth * scaleX))
-    let sizeY = Math.ceil((endYPixel - startYPixel) / (maskHeight * scaleY))
+let scaleX: any
+let scaleY: any
 
-    let canvas: HTMLCanvasElement = document.createElement("canvas");
-    canvas.width = 4096;
-    canvas.height = 4096;
-    let ctx = canvas.getContext("2d")!!
-    ctx.drawImage(shirt_uv, 0, 0)
-    let imageData = ctx.getImageData(0, 0, 4096, 4096)
-    let shallowgrid = [...grid]
+let startXPixel: any
+let startYPixel: any
+
+let imageData: any
+
+let sizeX: any
+let sizeY: any
+
+function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
+    if (!isSetup) {
+        dx = 10
+        dy = 0
+        startXPixel = pattern.corner1X * 4096
+        startYPixel = pattern.corner1Y * 4096
+        let endXPixel = pattern.corner2X * 4096
+        let endYPixel = pattern.corner2Y * 4096
+        scaleX = 4096 / canvasWidth
+        scaleY = 4096 / canvasHeight
+        sizeX = Math.ceil((endXPixel - startXPixel) / (maskWidth * scaleX))
+        sizeY = Math.ceil((endYPixel - startYPixel) / (maskHeight * scaleY))
+
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        canvas.width = 4096;
+        canvas.height = 4096;
+        let ctx = canvas.getContext("2d")!!
+        ctx.drawImage(shirt_uv, 0, 0)
+        imageData = ctx.getImageData(0, 0, 4096, 4096)
+        isSetup = true
+    }
+
     startX = Math.max(dx, startX)
     startY = Math.max(dy, startY)
     endX = Math.min(sizeX + dx, endX)
@@ -99,28 +124,28 @@ function draw(pattern: any, grid: any, setGrid: any, startX: number = 0, startY:
                 let selectedX = state.selectedTilePos[0]
                 let selectedY = state.selectedTilePos[1]
                 if (isSelected) {
-                    shallowgrid[y][x] = 2
+                    grid[y][x] = 2
                 } else {
-                    shallowgrid[y][x] = 1
+                    grid[y][x] = 1
                 }
             }
         }
     }
-    setGrid(shallowgrid)
 }
 
-export function onLoadImages(pattern: any, grid: any, setGrid: any) {
-    draw(pattern, grid, setGrid)
+export function onLoadImages(pattern: any, setGrid: any) {
+    draw(pattern)
+    setGrid(getGrid())
 }
 
-export function loadGrid(pattern: Pattern, grid: any, setGrid: any) {
+export function loadGrid(pattern: Pattern, setGrid: any) {
     let waitForLoad = loadImages()
 
     for (let image of waitForLoad) {
         image.onload = () => {
             waitForLoad.pop()
             if (waitForLoad.length === 0) {
-                onLoadImages(pattern, grid, setGrid)
+                onLoadImages(pattern, setGrid)
             }
         }
     }
