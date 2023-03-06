@@ -2,7 +2,10 @@ import React from 'react';
 
 import { useEffect, useState } from 'react'
 import { Settings } from '../settings'
-import { loadGrid, state, onLoadImages, removeSelection, addSelection } from './gridcanvas';
+import { loadGrid, state, onLoadImages, drawSelection } from './gridcanvas';
+
+let pos: number[][] = []
+let lastPos: number[] = []
 
 function KnittingEditor(props: any) {
 
@@ -11,37 +14,58 @@ function KnittingEditor(props: any) {
     }
 
     const [grid, setGrid] = useState(make2DArray(90, 90));
-    const [hoveredTile, setHoveredTile] = useState<number[]>([])
     const [brush, setBrush] = useState(undefined)
     const [showBrushPopup, setShowBrushPopup] = useState(false)
+    const [posUpdated, setPosUpdated] = useState(false)
 
     let brushImg: HTMLElement | null;
 
-    /*useEffect(() => {
-        brushImg = document.getElementById('brush')
-        window.addEventListener('pointermove', onPointerMove);
+    useEffect(() => {
+        //brushImg = document.getElementById('brush')
+        //window.addEventListener('pointermove', onPointerMove);
     }, [])
 
     function onPointerMove(event: { clientX: number; clientY: number; }) {
         brushImg!!.style.marginLeft = event.clientX + "px"
         brushImg!!.style.marginTop = event.clientY + "px"
-    }*/
+    }
+
+    function onMouseOver(e: any, x: any, y: any) {
+        if (!e) return
+        if (!props.selectedPattern) return;
+        if (lastPos.length == 0) lastPos = [x, y]
+        pos.push([x, y]) //NB
+        if (!posUpdated)
+            setPosUpdated(true)
+        //removeSelection(props.selectedPattern, grid, setGrid)
+    }
+
+    useEffect(() => {
+        while (pos.length > 0) {
+            let startX = lastPos[0]
+            let startY = lastPos[1]
+            let endX = pos[pos.length - 1][0]
+            let endY = pos[pos.length - 1][1]
+            let numDraw = Math.max(endY - startY, endX - startX)
+            for (let n = 0; n < numDraw; n++) {
+                let x = startX + Math.round((endX - startX) * n / numDraw)
+                let y = startY + Math.round((endY - startY) * n / numDraw)
+                lastPos = [x, y]
+                console.log(x, y)
+                drawSelection(props.selectedPattern, grid, setGrid, x, y)
+            }
+            pos.pop()
+        }
+        if (posUpdated)
+            setPosUpdated(false)
+    }, [posUpdated])
 
     useEffect(() => {
         if (!props.selectedPattern) return
         loadGrid(props.selectedPattern, grid, setGrid)
+        //let newGrid = getGrid()
+        //setGrid([...newGrid])
     }, [props.selectedPattern]);
-
-    //NB expensive
-    useEffect(() => {
-        if (!props.selectedPattern) return;
-        if (hoveredTile.length === 0) return;
-        removeSelection(props.selectedPattern, grid, setGrid)
-        state.selectedTilePos = hoveredTile
-        addSelection(props.selectedPattern, grid, setGrid)
-        //onLoadImages(props.selectedPattern, grid, setGrid)
-
-    }, [hoveredTile]);
 
     const colors = ["white", "black", "gray"]
 
@@ -71,7 +95,7 @@ function KnittingEditor(props: any) {
             }
             {/*<div id='brush' style={{ position: "absolute" }}>
                 <img src="brush.png" style={{ width: "30px" }}></img>
-        </div>*/}
+            </div>*/}
             <div style={{ display: "flex" }}>
                 <button style={{ marginRight: "0px" }} onClick={() => setShowBrushPopup(true)}>
                     <img src="brush.png" style={{ width: "30px" }}></img>
@@ -88,13 +112,25 @@ function KnittingEditor(props: any) {
                     {grid.map((gridY, y) =>
                         <div style={{ display: "flex" }} key={y}>
                             {gridY.map((colorIndex, x) =>
-                                <div className="grid" onMouseOver={() => setHoveredTile([x, y])} style={{ backgroundColor: colors[colorIndex] }} key={x + "," + y}></div>
+                                <div className="grid"
+                                    onMouseDown={(e) => {
+                                        onMouseOver(true, x, y)
+                                    }}
+                                    onMouseUp={(e) => {
+                                        onMouseOver(true, x, y)
+                                    }}
+                                    onMouseOver={(e: any) => {
+                                        let flags = e.buttons !== undefined ? e.buttons : e.which;
+                                        let primaryMouseButtonDown = (flags & 1) === 1;
+                                        onMouseOver(primaryMouseButtonDown, x, y)
+                                    }}
+                                    style={{ backgroundColor: colors[colorIndex] }} key={x + "," + y}></div>
                             )}
                         </div>
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

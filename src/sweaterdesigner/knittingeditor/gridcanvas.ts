@@ -10,6 +10,12 @@ let canvasHeight = settings.canvasHeight
 
 let shirt_uv: HTMLImageElement
 
+/*function make2DArray(x: number, y: number) {
+    return new Array(y).fill(0).map(() => new Array(x).fill(0))
+}
+
+let grid: any[][] = make2DArray(90, 90)*/
+
 export let state = {
     selectedTilePos: [] as number[]
 }
@@ -35,22 +41,28 @@ function distance(num1: number, num2: number) {
     return Math.abs(num1 - num2)
 }
 
-export function addSelection(pattern: any, grid: any, setGrid: any) {
-    let selectedX = state.selectedTilePos[0]
-    let selectedY = state.selectedTilePos[1]
-    draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2)
+export function drawSelection(pattern: any, grid: any, setGrid: any, x: any, y: any) {
+    let selectedX = x
+    let selectedY = y
+    draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
 }
 
-export function removeSelection(pattern: any, grid: any, setGrid: any) {
+/*export function addSelection(pattern: any, grid: any, setGrid: any, x: any, y: any) {
+    let selectedX = x
+    let selectedY = y
+    draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
+}
+
+/*export function removeSelection(pattern: any, grid: any, setGrid: any) {
     let selectedX = state.selectedTilePos[0]
     let selectedY = state.selectedTilePos[1]
     let temp = [...state.selectedTilePos]
     state.selectedTilePos = [-999, -999]
     draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2)
     state.selectedTilePos = [...temp]
-}
+}*/
 
-function draw(pattern: any, grid: any, setGrid: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity) {
+function draw(pattern: any, grid: any, setGrid: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
     let dx = 10
     let dy = 0
     let startXPixel = pattern.corner1X * 4096
@@ -68,8 +80,7 @@ function draw(pattern: any, grid: any, setGrid: any, startX: number = 0, startY:
     let ctx = canvas.getContext("2d")!!
     ctx.drawImage(shirt_uv, 0, 0)
     let imageData = ctx.getImageData(0, 0, 4096, 4096)
-    let shallow_grid = [...grid]
-
+    let shallowgrid = [...grid]
     startX = Math.max(dx, startX)
     startY = Math.max(dy, startY)
     endX = Math.min(sizeX + dx, endX)
@@ -87,15 +98,15 @@ function draw(pattern: any, grid: any, setGrid: any, startX: number = 0, startY:
             if (NW && NE && SW && SE) { //Do four corner checks, and adjust output depending
                 let selectedX = state.selectedTilePos[0]
                 let selectedY = state.selectedTilePos[1]
-                if (distance(selectedX, x) <= 1 && distance(selectedY, y) <= 1) {
-                    shallow_grid[y][x] = 2
+                if (isSelected) {
+                    shallowgrid[y][x] = 2
                 } else {
-                    shallow_grid[y][x] = 1
+                    shallowgrid[y][x] = 1
                 }
             }
         }
     }
-    setGrid(shallow_grid)
+    setGrid(shallowgrid)
 }
 
 export function onLoadImages(pattern: any, grid: any, setGrid: any) {
