@@ -116,13 +116,12 @@ function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number
             let xPixel = Math.round((x - dx) * scaleX * maskWidth + startXPixel)
             let yPixel = Math.round((y - dy) * scaleY * maskHeight + startYPixel)
             //x and y have to be scaled if canvas.width != 4096
+            //NB: Consider caching this 
             let NW = pixelData(imageData, xPixel, yPixel) >= 128
             let NE = pixelData(imageData, xPixel + maskWidth, yPixel) >= 128
             let SW = pixelData(imageData, xPixel, yPixel + maskHeight) >= 128
             let SE = pixelData(imageData, xPixel + maskWidth, yPixel + maskHeight) >= 128
             if (NW && NE && SW && SE) { //Do four corner checks, and adjust output depending
-                let selectedX = state.selectedTilePos[0]
-                let selectedY = state.selectedTilePos[1]
                 if (isSelected) {
                     grid[y][x] = 2
                 } else {

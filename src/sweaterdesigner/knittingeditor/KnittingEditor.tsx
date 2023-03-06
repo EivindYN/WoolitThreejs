@@ -30,33 +30,20 @@ function KnittingEditor(props: any) {
         brushImg!!.style.marginTop = event.clientY + "px"
     }
 
-    function onMouseOver(x: any, y: any) {
+    function onMouseOver(endX: any, endY: any) {
         if (!props.selectedPattern) return;
-        pos.push([x, y]) //NB
-        if (!posUpdated)
-            setPosUpdated(true)
-        //removeSelection(props.selectedPattern, grid, setGrid)
-    }
-
-    useEffect(() => {
-        while (pos.length > 0) {
-            let startX = lastPos[0]
-            let startY = lastPos[1]
-            let endX = pos[0][0]
-            let endY = pos[0][1]
-            let numDraw = Math.max(Math.abs(endY - startY), Math.abs(endX - startX))
-            for (let n = 0; n < numDraw; n++) {
-                let x = startX + Math.round((endX - startX) * n / numDraw)
-                let y = startY + Math.round((endY - startY) * n / numDraw)
-                lastPos = [x, y]
-                drawSelection(props.selectedPattern, x, y)
-            }
-            pos.shift()
+        let startX = lastPos[0]
+        let startY = lastPos[1]
+        let numDraw = Math.max(Math.abs(endY - startY), Math.abs(endX - startX)) + 1
+        for (let n = 0; n < numDraw; n++) {
+            let x = startX + Math.round((endX - startX) * n / numDraw)
+            let y = startY + Math.round((endY - startY) * n / numDraw)
+            lastPos = [x, y]
+            drawSelection(props.selectedPattern, x, y)
         }
         setGrid(getGrid())
-        if (posUpdated)
-            setPosUpdated(false)
-    }, [posUpdated])
+    }
+
 
     useEffect(() => {
         if (!props.selectedPattern) return
@@ -122,7 +109,7 @@ function KnittingEditor(props: any) {
                                         if (primaryMouseButtonDown)
                                             onMouseOver(x, y)
                                     }}
-                                    style={{ backgroundColor: colors[colorIndex] }} key={x + "," + y}></div>
+                                    style={{ backgroundColor: colors[colorIndex] }} key={colorIndex + "," + x + "," + y}></div>
                             )}
                         </div>
                     )}
