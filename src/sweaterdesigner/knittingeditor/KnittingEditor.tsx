@@ -96,11 +96,11 @@ function KnittingEditor(props: any) {
                         <div style={{ display: "flex" }} key={y}>
                             {gridY.map((colorIndex, x) =>
                                 <div className="grid"
-                                    onMouseDown={(e) => {
+                                    onMouseDown={(_) => {
                                         lastPos = [x, y]
                                         onMouseOver(x, y)
                                     }}
-                                    onMouseUp={(e) => {
+                                    onMouseUp={(_) => {
                                         onMouseOver(x, y)
                                     }}
                                     onMouseOver={(e: any) => {
