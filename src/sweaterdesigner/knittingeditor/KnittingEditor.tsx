@@ -32,7 +32,6 @@ function KnittingEditor(props: any) {
 
     function onMouseOver(x: any, y: any) {
         if (!props.selectedPattern) return;
-        console.log("push: " + x + "," + y)
         pos.push([x, y]) //NB
         if (!posUpdated)
             setPosUpdated(true)
@@ -45,12 +44,11 @@ function KnittingEditor(props: any) {
             let startY = lastPos[1]
             let endX = pos[pos.length - 1][0]
             let endY = pos[pos.length - 1][1]
-            let numDraw = Math.max(endY - startY, endX - startX)
+            let numDraw = Math.max(Math.abs(endY - startY), Math.abs(endX - startX))
             for (let n = 0; n < numDraw; n++) {
                 let x = startX + Math.round((endX - startX) * n / numDraw)
                 let y = startY + Math.round((endY - startY) * n / numDraw)
                 lastPos = [x, y]
-                console.log(x, y)
                 drawSelection(props.selectedPattern, x, y)
             }
             pos.pop()
