@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useEffect, useState } from 'react'
 import { Settings } from '../settings'
-import { loadGrid, state, onLoadImages } from './gridcanvas';
+import { loadGrid, state, onLoadImages, removeSelection, addSelection } from './gridcanvas';
 
 function KnittingEditor(props: any) {
 
@@ -24,8 +24,10 @@ function KnittingEditor(props: any) {
     useEffect(() => {
         if (!props.selectedPattern) return;
         if (hoveredTile.length === 0) return;
+        removeSelection(props.selectedPattern, grid, setGrid)
         state.selectedTilePos = hoveredTile
-        onLoadImages(props.selectedPattern, grid, setGrid)
+        addSelection(props.selectedPattern, grid, setGrid)
+        //onLoadImages(props.selectedPattern, grid, setGrid)
 
     }, [hoveredTile]);
 

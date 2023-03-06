@@ -35,47 +35,71 @@ function distance(num1: number, num2: number) {
     return Math.abs(num1 - num2)
 }
 
-export function onLoadImages(pattern: any, grid: any, setGrid: any) {
+export function addSelection(pattern: any, grid: any, setGrid: any) {
+    let selectedX = state.selectedTilePos[0]
+    let selectedY = state.selectedTilePos[1]
+    draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2)
+}
+
+export function removeSelection(pattern: any, grid: any, setGrid: any) {
+    let selectedX = state.selectedTilePos[0]
+    let selectedY = state.selectedTilePos[1]
+    let temp = [...state.selectedTilePos]
+    state.selectedTilePos = [-999, -999]
+    draw(pattern, grid, setGrid, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2)
+    state.selectedTilePos = [...temp]
+}
+
+function draw(pattern: any, grid: any, setGrid: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity) {
+    let dx = 10
+    let dy = 0
+    let startXPixel = pattern.corner1X * 4096
+    let startYPixel = pattern.corner1Y * 4096
+    let endXPixel = pattern.corner2X * 4096
+    let endYPixel = pattern.corner2Y * 4096
+    let scaleX = 4096 / canvasWidth
+    let scaleY = 4096 / canvasHeight
+    let sizeX = Math.ceil((endXPixel - startXPixel) / (maskWidth * scaleX))
+    let sizeY = Math.ceil((endYPixel - startYPixel) / (maskHeight * scaleY))
+
     let canvas: HTMLCanvasElement = document.createElement("canvas");
     canvas.width = 4096;
     canvas.height = 4096;
     let ctx = canvas.getContext("2d")!!
     ctx.drawImage(shirt_uv, 0, 0)
     let imageData = ctx.getImageData(0, 0, 4096, 4096)
-    let startX = pattern.corner1X * 4096
-    let startY = pattern.corner1Y * 4096
-    let endX = pattern.corner2X * 4096
-    let endY = pattern.corner2Y * 4096
     let shallow_grid = [...grid]
-    let xIndex = 10
-    let scaleX = 4096 / canvasWidth
-    let scaleY = 4096 / canvasHeight
-    for (let xFloat = startX; xFloat < endX; xFloat += maskWidth * scaleX) {
-        let yIndex = 0
-        for (let yFloat = startY; yFloat < endY; yFloat += maskHeight * scaleY) {
-            let x = Math.round(xFloat)
-            let y = Math.round(yFloat)
+
+    startX = Math.max(dx, startX)
+    startY = Math.max(dy, startY)
+    endX = Math.min(sizeX + dx, endX)
+    endY = Math.min(sizeY + dy, endY)
+
+    for (let x = startX; x < endX; x += 1) {
+        for (let y = startY; y < endY; y += 1) {
+            let xPixel = Math.round((x - dx) * scaleX * maskWidth + startXPixel)
+            let yPixel = Math.round((y - dy) * scaleY * maskHeight + startYPixel)
             //x and y have to be scaled if canvas.width != 4096
-            let NW = pixelData(imageData, x, y) >= 128
-            let NE = pixelData(imageData, x + maskWidth, y) >= 128
-            let SW = pixelData(imageData, x, y + maskHeight) >= 128
-            let SE = pixelData(imageData, x + maskWidth, y + maskHeight) >= 128
+            let NW = pixelData(imageData, xPixel, yPixel) >= 128
+            let NE = pixelData(imageData, xPixel + maskWidth, yPixel) >= 128
+            let SW = pixelData(imageData, xPixel, yPixel + maskHeight) >= 128
+            let SE = pixelData(imageData, xPixel + maskWidth, yPixel + maskHeight) >= 128
             if (NW && NE && SW && SE) { //Do four corner checks, and adjust output depending
                 let selectedX = state.selectedTilePos[0]
                 let selectedY = state.selectedTilePos[1]
-                if (distance(selectedX, xIndex) <= 1 && distance(selectedY, yIndex) <= 1) {
-                    shallow_grid[yIndex][xIndex] = 2
+                if (distance(selectedX, x) <= 1 && distance(selectedY, y) <= 1) {
+                    shallow_grid[y][x] = 2
                 } else {
-                    shallow_grid[yIndex][xIndex] = 1
+                    shallow_grid[y][x] = 1
                 }
             }
-            yIndex++;
         }
-        xIndex++;
     }
-    console.log("set grid")
     setGrid(shallow_grid)
+}
 
+export function onLoadImages(pattern: any, grid: any, setGrid: any) {
+    draw(pattern, grid, setGrid)
 }
 
 export function loadGrid(pattern: Pattern, grid: any, setGrid: any) {
