@@ -56,7 +56,7 @@ export function drawCanvas(
     patterns_arg: Pattern[],
     colors: any[],
     repeatY: boolean,
-    selectedPatterns: Pattern[]
+    selectedPattern: Pattern | undefined
 ) {
     if (prerender === null) {
         prerender = createPrerender(colors);
@@ -88,7 +88,7 @@ export function drawCanvas(
                 } else {
                     color = colors[0];
                 }
-                if (selectedPatterns.includes(pattern)) {
+                if (selectedPattern === pattern) {
                     color = lighten_color(color)
                 }
                 ctx.drawImage(

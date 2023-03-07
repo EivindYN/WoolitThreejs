@@ -15,7 +15,7 @@ function make2DArray(x: number, y: number) {
     return new Array(y).fill(0).map(() => new Array(x).fill(0))
 }
 
-let grid: any[][] = make2DArray(90, 90)
+let grid: any[][] = make2DArray(150, 150) //NB, should change depending on pattern
 
 export function getGrid() {
     let shallowGrid = []

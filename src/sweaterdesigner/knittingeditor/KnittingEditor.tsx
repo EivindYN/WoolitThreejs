@@ -13,7 +13,7 @@ function KnittingEditor(props: any) {
         return new Array(y).fill(0).map(() => new Array(x).fill(0))
     }
 
-    const [grid, setGrid] = useState(make2DArray(90, 90));
+    const [grid, setGrid] = useState(make2DArray(150, 150)); //NB, should change depending on pattern
     const [brush, setBrush] = useState(undefined)
     const [showBrushPopup, setShowBrushPopup] = useState(false)
     const [posUpdated, setPosUpdated] = useState(false)

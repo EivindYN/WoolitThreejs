@@ -14,7 +14,7 @@ import { Pattern } from '../pattern';
 import { createCanvas, loadImages, renderAfterLoad, drawCanvas } from './texturecanvas';
 
 let pointer: THREE.Vector2;
-let selectedPatterns: Pattern[];
+let selectedPattern: Pattern | undefined;
 let material: THREE.MeshBasicMaterial;
 let scene: THREE.Scene;
 let texture_canvas: HTMLCanvasElement;
@@ -36,7 +36,6 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
     material = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide
     });
-    selectedPatterns = [];
     scene = new THREE.Scene();
     let colorsHex = []
     let ctx = texture_canvas.getContext("2d")!!;
@@ -101,7 +100,7 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
             waitForLoad.pop()
             if (waitForLoad.length === 0) {
                 renderAfterLoad(texture_canvas, colors)
-                drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPatterns);
+                drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPattern);
             }
         }
     }
@@ -140,7 +139,7 @@ function onPointerMove(event: { clientX: number; clientY: number; }) {
 
 function onClick(_: any) {
     if (!hasMoved && pointer.x > -1) { //NB
-        setSelectedPattern(selectedPatterns[0])
+        setSelectedPattern(selectedPattern)
     }
 }
 
@@ -153,7 +152,7 @@ function render() {
 
     // calculate objects intersecting the picking ray
     const intersects = raycaster.intersectObjects(scene.children, false);
-    selectedPatterns = []
+    selectedPattern = undefined
     for (let i = 0; i < intersects.length; i++) {
         let uv = intersects[i].uv!!;
 
@@ -162,7 +161,7 @@ function render() {
             let insideX = uv.x < target.corner2X && uv.x > target.corner1X;
             let insideY = uv.y < target.corner2Y && uv.y > target.corner1Y;
             if (insideX && insideY) {
-                selectedPatterns = [pattern[n]]
+                selectedPattern = pattern[n]
             }
         }
         //intersects[i].object.material.color.set(0xff0000);
@@ -185,7 +184,7 @@ function animate() {
 function updateCanvas() {
     if (texture_canvas) {
         requestAnimationFrame(() => {
-            drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPatterns);
+            drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPattern);
             material.map!!.needsUpdate = true;
         });
     }
