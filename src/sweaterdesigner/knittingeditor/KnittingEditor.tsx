@@ -1,8 +1,10 @@
 import React from 'react';
 
 import { useEffect, useState } from 'react'
+import { updateCanvas, resetCanvas } from '../knittingpreview/scene';
+import { createCanvas } from '../knittingpreview/texturecanvas';
 import { Settings } from '../settings'
-import { loadGrid, state, onLoadImages, drawSelection, getGrid } from './gridcanvas';
+import { loadGrid, state, onLoadImages, drawSelection, getGrid, unCachePattern } from './gridcanvas';
 
 let pos: number[][] = []
 let lastPos: number[] = []
@@ -13,7 +15,7 @@ function KnittingEditor(props: any) {
         return new Array(y).fill(0).map(() => new Array(x).fill(0))
     }
 
-    const [grid, setGrid] = useState(make2DArray(150, 150)); //NB, should change depending on pattern
+    const [grid, setGrid] = useState(make2DArray(200, 200)); //NB, should change depending on pattern
     const [brush, setBrush] = useState(undefined)
     const [showBrushPopup, setShowBrushPopup] = useState(false)
     const [posUpdated, setPosUpdated] = useState(false)
@@ -51,7 +53,17 @@ function KnittingEditor(props: any) {
     }
 
     function changeMaskSize(size: string) {
-
+        const oldMasksPer10Cm = Settings.masksPer10Cm
+        switch (size) {
+            case "S": Settings.masksPer10Cm = 28; break;
+            case "M": Settings.masksPer10Cm = 18; break;
+            case "L": Settings.masksPer10Cm = 12; break;
+        }
+        if (oldMasksPer10Cm === Settings.masksPer10Cm) return;
+        Settings.updateCanvasDimensions()
+        resetCanvas()
+        unCachePattern()
+        loadGrid(props.selectedPattern, setGrid)
     }
 
     const colors = ["white", "red", "black"]

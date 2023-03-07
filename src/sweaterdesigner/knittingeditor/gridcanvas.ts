@@ -2,14 +2,11 @@ import { start } from 'repl';
 import { Pattern } from '../pattern';
 import { Settings } from '../settings';
 
-let settings = new Settings()
-let maskWidth = settings.maskWidth
-let maskHeight = settings.maskHeight
-let canvasWidth = settings.canvasWidth
-let canvasHeight = settings.canvasHeight
+let maskWidth = Settings.maskWidth
+let maskHeight = Settings.maskHeight
 
 let shirt_uv: HTMLImageElement
-let setupPattern: Pattern | undefined
+export let setupPattern: Pattern | undefined
 
 function make2DArray(x: number, y: number) {
     return new Array(y).fill(0).map(() => new Array(x).fill(0))
@@ -85,7 +82,7 @@ let sizeX: any
 let sizeY: any
 
 function clearPattern() {
-    grid = make2DArray(150, 150)
+    grid = make2DArray(200, 200)
 }
 
 function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
@@ -97,8 +94,8 @@ function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number
         startYPixel = pattern.corner1Y * 4096
         let endXPixel = pattern.corner2X * 4096
         let endYPixel = pattern.corner2Y * 4096
-        scaleX = 4096 / canvasWidth
-        scaleY = 4096 / canvasHeight
+        scaleX = 4096 / Settings.canvasWidth
+        scaleY = 4096 / Settings.canvasHeight
         sizeX = Math.ceil((endXPixel - startXPixel) / (maskWidth * scaleX))
         sizeY = Math.ceil((endYPixel - startYPixel) / (maskHeight * scaleY))
 
@@ -134,6 +131,10 @@ function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number
             }
         }
     }
+}
+
+export function unCachePattern() {
+    setupPattern = undefined
 }
 
 export function onLoadImages(pattern: any, setGrid: any) {

@@ -3,11 +3,8 @@ import { hexToRgb, lighten_color } from './colorutil.ts'
 import { Pattern } from '../pattern';
 import { Settings } from '../settings'
 
-let settings = new Settings()
-let maskWidth = settings.maskWidth
-let maskHeight = settings.maskHeight
-let canvasWidth = settings.canvasWidth
-let canvasHeight = settings.canvasHeight
+let maskWidth = Settings.maskWidth
+let maskHeight = Settings.maskHeight
 
 let prerender: { canvases: any; } | null = null;
 
@@ -32,8 +29,9 @@ export function loadImages() {
 
 export function createCanvas() {
     let canvas = document.createElement("canvas");
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+
+    canvas.width = Settings.canvasWidth;
+    canvas.height = Settings.canvasHeight;
 
     return canvas;
 }

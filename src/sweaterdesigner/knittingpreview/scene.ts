@@ -12,6 +12,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Pattern } from '../pattern';
 // @ts-ignore
 import { createCanvas, loadImages, renderAfterLoad, drawCanvas } from './texturecanvas';
+import { Settings } from '../settings';
 
 let pointer: THREE.Vector2;
 let selectedPattern: Pattern | undefined;
@@ -181,7 +182,17 @@ function animate() {
     render();
 }
 
-function updateCanvas() {
+export function resetCanvas() {
+    texture_canvas.width = Settings.canvasWidth
+    texture_canvas.height = Settings.canvasHeight
+
+
+    material.map = new THREE.Texture(texture_canvas);
+    material.map.wrapS = THREE.RepeatWrapping;
+    material.map.flipY = false;
+}
+
+export function updateCanvas() {
     if (texture_canvas) {
         requestAnimationFrame(() => {
             drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPattern);
