@@ -28,7 +28,7 @@ let waitForLoad: HTMLImageElement[];
 let raycaster = new THREE.Raycaster();
 let setSelectedPattern: any;
 
-let hasMoved: boolean
+let moveCounter: number
 
 export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[], setSelectedPattern_arg: any) {
     setSelectedPattern = setSelectedPattern_arg
@@ -85,7 +85,7 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
     material.map.needsUpdate = true;
 
     window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener("mousedown", () => { hasMoved = false })
+    window.addEventListener("mousedown", () => { moveCounter = 0 })
     window.addEventListener("mouseup", onClick)
 
     requestAnimationFrame(() => {
@@ -134,11 +134,11 @@ function onPointerMove(event: { clientX: number; clientY: number; }) {
     let x = ((event.clientX / window.innerWidth) * 2 - 1) * 2 - 1; //NB
     let y = - (event.clientY / window.innerHeight) * 2 + 1
     pointer = new THREE.Vector2(x, y)
-    hasMoved = true
+    moveCounter += 1
 }
 
 function onClick(_: any) {
-    if (!hasMoved && pointer.x > -1) { //NB
+    if (moveCounter <= 1 && pointer.x > -1) { //NB
         setSelectedPattern(selectedPattern)
     }
 }

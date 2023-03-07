@@ -25,6 +25,12 @@ function KnittingEditor(props: any) {
         //window.addEventListener('pointermove', onPointerMove);
     }, [])
 
+
+    useEffect(() => {
+        if (!props.selectedPattern) return
+        loadGrid(props.selectedPattern, setGrid)
+    }, [props.selectedPattern]);
+
     function onPointerMove(event: { clientX: number; clientY: number; }) {
         brushImg!!.style.marginLeft = event.clientX + "px"
         brushImg!!.style.marginTop = event.clientY + "px"
@@ -44,11 +50,9 @@ function KnittingEditor(props: any) {
         setGrid(getGrid())
     }
 
+    function changeMaskSize(size: string) {
 
-    useEffect(() => {
-        if (!props.selectedPattern) return
-        loadGrid(props.selectedPattern, setGrid)
-    }, [props.selectedPattern]);
+    }
 
     const colors = ["white", "red", "black"]
 
@@ -83,12 +87,25 @@ function KnittingEditor(props: any) {
                 <button style={{ marginRight: "0px" }} onClick={() => setShowBrushPopup(true)}>
                     <img src="brush.png" style={{ width: "30px" }}></img>
                 </button>
-                <button style={{ marginRight: "0px", borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}>
-                    <img src="undo.png" style={{ width: "30px" }}></img>
-                </button>
-                <button style={{ marginLeft: "0px", borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}>
-                    <img src="redo.png" style={{ width: "30px" }}></img>
-                </button>
+                <div className='buttonContainer'>
+                    <button>
+                        <img src="undo.png" style={{ width: "30px" }}></img>
+                    </button>
+                    <button>
+                        <img src="redo.png" style={{ width: "30px" }}></img>
+                    </button>
+                </div>
+                <div className='buttonContainer'>
+                    <button onClick={() => changeMaskSize("S")}>
+                        S
+                    </button>
+                    <button onClick={() => changeMaskSize("M")}>
+                        M
+                    </button>
+                    <button onClick={() => changeMaskSize("L")}>
+                        L
+                    </button>
+                </div>
             </div>
             <div className="box" style={{ margin: "10px", height: "85vh", overflow: "scroll" }}>
                 <div style={{ margin: "10px" }}>

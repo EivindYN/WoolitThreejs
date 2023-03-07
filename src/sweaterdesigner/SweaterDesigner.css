@@ -22,6 +22,23 @@ button,
   border-radius: 10px;
 }
 
+.buttonContainer {
+  display: flex;
+}
+
+.buttonContainer :not(:first-child) {
+  margin-left: 0px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.buttonContainer :not(:last-child) {
+  margin-right: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+
 button,
 .box,
 .grid,

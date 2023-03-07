@@ -9,7 +9,7 @@ let canvasWidth = settings.canvasWidth
 let canvasHeight = settings.canvasHeight
 
 let shirt_uv: HTMLImageElement
-let isSetup: Boolean = false
+let setupPattern: Pattern | undefined
 
 function make2DArray(x: number, y: number) {
     return new Array(y).fill(0).map(() => new Array(x).fill(0))
@@ -84,8 +84,13 @@ let imageData: any
 let sizeX: any
 let sizeY: any
 
+function clearPattern() {
+    grid = make2DArray(150, 150)
+}
+
 function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
-    if (!isSetup) {
+    if (setupPattern !== pattern) {
+        clearPattern()
         dx = 10
         dy = 0
         startXPixel = pattern.corner1X * 4096
@@ -103,7 +108,7 @@ function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number
         let ctx = canvas.getContext("2d")!!
         ctx.drawImage(shirt_uv, 0, 0)
         imageData = ctx.getImageData(0, 0, 4096, 4096)
-        isSetup = true
+        setupPattern = pattern
     }
 
     startX = Math.max(dx, startX)

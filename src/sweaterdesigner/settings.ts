@@ -1,7 +1,7 @@
 
 export class Settings {
-    maskHeight = 7 * 4;
-    maskWidth = 8 * 4;
-    canvasWidth = 1024 * 6;
-    canvasHeight = 1024 * 6;
+    maskHeight = 36;
+    maskWidth = 32;
+    canvasWidth = 4096 * 18 / 10; //4096 => 106 masker rundt 
+    canvasHeight = 4096 * 18 / 10;
 }
