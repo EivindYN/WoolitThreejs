@@ -12,7 +12,7 @@ function make2DArray(x: number, y: number) {
     return new Array(y).fill(0).map(() => new Array(x).fill(0))
 }
 
-let grid: any[][] = make2DArray(150, 150) //NB, should change depending on pattern
+let grid: any[][] = make2DArray(Settings.gridSize, Settings.gridSize) //NB, should change depending on pattern
 
 export function getGrid() {
     let shallowGrid = []
@@ -82,7 +82,7 @@ let sizeX: any
 let sizeY: any
 
 function clearPattern() {
-    grid = make2DArray(200, 200)
+    grid = make2DArray(Settings.gridSize, Settings.gridSize)
 }
 
 function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
