@@ -20,7 +20,7 @@ let material: THREE.MeshBasicMaterial;
 let scene: THREE.Scene;
 let texture_canvas: HTMLCanvasElement;
 let colors: string[];
-let pattern: Pattern[];
+let patterns: Pattern[];
 let camera: THREE.PerspectiveCamera;
 let renderer: THREE.WebGLRenderer;
 let last_resize: Date;
@@ -30,6 +30,8 @@ let raycaster = new THREE.Raycaster();
 let setSelectedPattern: any;
 
 let moveCounter: number
+let updateCanvasNextFrame: boolean;
+let updatedPattern: Pattern | undefined;
 
 export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[], setSelectedPattern_arg: any) {
     setSelectedPattern = setSelectedPattern_arg
@@ -45,7 +47,7 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
         colorsHex.push(ctx.fillStyle)
     }
     colors = colorsHex
-    pattern = pattern_arg
+    patterns = pattern_arg
     camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 2000);
     renderer = new THREE.WebGLRenderer({
         antialias: true
@@ -101,7 +103,8 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
             waitForLoad.pop()
             if (waitForLoad.length === 0) {
                 renderAfterLoad(texture_canvas, colors)
-                drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPattern);
+                //drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPattern);
+                updateCanvas()
             }
         }
     }
@@ -158,18 +161,26 @@ function render() {
     for (let i = 0; i < intersects.length; i++) {
         let uv = intersects[i].uv!!;
 
-        for (let n = 0; n < pattern.length; n++) {
-            let target = pattern[n]
+        for (let n = 0; n < patterns.length; n++) {
+            let target = patterns[n]
             let insideX = uv.x < target.corner2X && uv.x > target.corner1X;
             let insideY = uv.y < target.corner2Y && uv.y > target.corner1Y;
             if (insideX && insideY) {
-                selectedPattern = pattern[n]
+                selectedPattern = patterns[n]
             }
         }
         //intersects[i].object.material.color.set(0xff0000);
     }
-    if (oldSelectedPattern != selectedPattern) {
+    if (oldSelectedPattern != selectedPattern || updateCanvasNextFrame) {
         updateCanvas()
+        updateCanvasNextFrame = false;
+    }
+}
+
+export function setUpdateCanvasNextFrame(updatedPattern_arg: Pattern | undefined = undefined) {
+    updateCanvasNextFrame = true;
+    if (updatedPattern_arg !== undefined) {
+        updatedPattern = updatedPattern_arg
     }
 }
 
@@ -193,14 +204,16 @@ export function resetCanvas() {
     material.map.wrapS = THREE.RepeatWrapping;
     material.map.flipY = false;
 
-    updateCanvas()
+    updateCanvasNextFrame = true;
 }
 
-export function updateCanvas() {
+function updateCanvas() {
     if (texture_canvas) {
         requestAnimationFrame(() => {
-            drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPattern);
+            let patterns_arg = updatedPattern ? updatedPattern : patterns
+            drawCanvas(texture_canvas, patterns, colors, repeatY, selectedPattern);
             material.map!!.needsUpdate = true;
+            updatedPattern = undefined
         });
     }
 }

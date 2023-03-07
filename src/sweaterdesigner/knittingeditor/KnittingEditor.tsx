@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useEffect, useState } from 'react'
-import { updateCanvas, resetCanvas } from '../knittingpreview/scene';
+import { resetCanvas, setUpdateCanvasNextFrame } from '../knittingpreview/scene';
 import { createCanvas } from '../knittingpreview/texturecanvas';
 import { Settings } from '../settings'
 import { loadGrid, state, onLoadImages, drawSelection, getGrid, unCachePattern } from './gridcanvas';
@@ -50,6 +50,7 @@ function KnittingEditor(props: any) {
             drawSelection(props.selectedPattern, x, y)
         }
         setGrid(getGrid())
+        setUpdateCanvasNextFrame(props.selectedPattern)
     }
 
     function changeMaskSize(size: string) {
@@ -63,7 +64,7 @@ function KnittingEditor(props: any) {
         Settings.updateCanvasDimensions()
         resetCanvas()
         unCachePattern()
-        loadGrid(props.selectedPattern, setGrid)
+        loadGrid(props.selectedPattern, setGrid) //Re-select pattern
     }
 
     const colors = ["white", "red", "black"]
