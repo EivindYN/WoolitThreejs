@@ -153,6 +153,7 @@ function render() {
 
     // calculate objects intersecting the picking ray
     const intersects = raycaster.intersectObjects(scene.children, false);
+    let oldSelectedPattern = selectedPattern
     selectedPattern = undefined
     for (let i = 0; i < intersects.length; i++) {
         let uv = intersects[i].uv!!;
@@ -167,8 +168,9 @@ function render() {
         }
         //intersects[i].object.material.color.set(0xff0000);
     }
-    updateCanvas()
-    renderer.render(scene, camera);
+    if (oldSelectedPattern != selectedPattern) {
+        updateCanvas()
+    }
 }
 
 function animate() {
@@ -190,6 +192,8 @@ export function resetCanvas() {
     material.map = new THREE.Texture(texture_canvas);
     material.map.wrapS = THREE.RepeatWrapping;
     material.map.flipY = false;
+
+    updateCanvas()
 }
 
 export function updateCanvas() {
