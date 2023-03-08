@@ -212,8 +212,8 @@ export function resetCanvas() {
 function updateCanvas() {
     if (texture_canvas) {
         requestAnimationFrame(() => {
-            let sweaterParts_arg = updatedSweaterPart ? updatedSweaterPart : sweaterParts
-            drawCanvas(texture_canvas, sweaterParts, colors, repeatY, selectedSweaterPart);
+            let sweaterParts_arg = updatedSweaterPart ? [updatedSweaterPart] : sweaterParts
+            drawCanvas(texture_canvas, sweaterParts_arg, colors, repeatY, selectedSweaterPart);
             material.map!!.needsUpdate = true;
             updatedSweaterPart = undefined
         });
