@@ -54,11 +54,11 @@ function KnittingEditor(props: any) {
 
     function onMouseOver(endX: any, endY: any) {
         if (!props.selectedSweaterPart) return;
-        const brush = true
+        const brush = false
         if (brush) {
             drawBrush(endX, endY);
         }
-        const pattern = false
+        const pattern = true
         if (pattern) {
 
         }
@@ -81,7 +81,7 @@ function KnittingEditor(props: any) {
     const colors = ["white", "red", "black"]
 
     return (
-        <div style={{ height: "100vh", minWidth: "50%", backgroundColor: "#f9f5f2", maxWidth: "50%" }}>
+        <div style={{ height: "98vh", minWidth: "50%", backgroundColor: "#f9f5f2", maxWidth: "50%" }}>
             {showBrushPopup &&
                 <div
                     className='box'
@@ -131,8 +131,8 @@ function KnittingEditor(props: any) {
                     </button>
                 </div>
             </div>
-            <div className="box" style={{ margin: "10px", height: "85vh", overflow: "scroll" }}>
-                <div style={{ margin: "10px" }}>
+            <div className="box" style={{ margin: "10px", height: "87.5vh", overflow: "scroll" }}>
+                <div style={{ margin: "0px" }}>
                     {grid.map((gridY, y) =>
                         <div style={{ display: "flex" }} key={y}>
                             {gridY.map((colorIndex, x) =>

@@ -14,7 +14,7 @@ function SweaterDesigner() {
                 <div
                     style={{
                         position: "absolute",
-                        height: "100%",
+                        height: "98vh",
                         width: "50%",
                         display: "flex",
                         backgroundColor: "black",

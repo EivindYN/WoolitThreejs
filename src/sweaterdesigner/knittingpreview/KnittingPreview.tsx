@@ -37,7 +37,7 @@ function KnittingPreview(props: any) {
     }, []);
 
     return (
-        <div id="canvas" style={{ height: "50vh", width: "25vw" }}></div>
+        <div id="canvas" style={{ height: "49vh", width: "25vw" }}></div>
     );
 }
 
