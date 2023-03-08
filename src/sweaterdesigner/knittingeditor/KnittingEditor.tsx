@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { resetCanvas, setUpdateCanvasNextFrame } from '../knittingpreview/scene';
 import { createCanvas } from '../knittingpreview/texturecanvas';
 import { Settings } from '../settings'
-import { loadGrid, state, onLoadImages, drawSelection, getGrid, unCachePattern } from './gridcanvas';
+import { loadGrid, state, onLoadImages, drawSelection, getGrid, unCacheDraw } from './gridcanvas';
 
 let pos: number[][] = []
 let lastPos: number[] = []
@@ -29,17 +29,16 @@ function KnittingEditor(props: any) {
 
 
     useEffect(() => {
-        if (!props.selectedPattern) return
-        loadGrid(props.selectedPattern, setGrid)
-    }, [props.selectedPattern]);
+        if (!props.selectedSweaterPart) return
+        loadGrid(props.selectedSweaterPart, setGrid)
+    }, [props.selectedSweaterPart]);
 
     function onPointerMove(event: { clientX: number; clientY: number; }) {
         brushImg!!.style.marginLeft = event.clientX + "px"
         brushImg!!.style.marginTop = event.clientY + "px"
     }
 
-    function onMouseOver(endX: any, endY: any) {
-        if (!props.selectedPattern) return;
+    function drawBrush(endX: any, endY: any) {
         let startX = lastPos[0]
         let startY = lastPos[1]
         let numDraw = Math.max(Math.abs(endY - startY), Math.abs(endX - startX)) + 1
@@ -47,10 +46,22 @@ function KnittingEditor(props: any) {
             let x = startX + Math.round((endX - startX) * n / numDraw)
             let y = startY + Math.round((endY - startY) * n / numDraw)
             lastPos = [x, y]
-            drawSelection(props.selectedPattern, x, y)
+            drawSelection(props.selectedSweaterPart, x, y)
         }
         setGrid(getGrid())
-        setUpdateCanvasNextFrame(props.selectedPattern)
+        setUpdateCanvasNextFrame(props.selectedSweaterPart)
+    }
+
+    function onMouseOver(endX: any, endY: any) {
+        if (!props.selectedSweaterPart) return;
+        const brush = true
+        if (brush) {
+            drawBrush(endX, endY);
+        }
+        const pattern = false
+        if (pattern) {
+
+        }
     }
 
     function changeMaskSize(size: string) {
@@ -63,8 +74,8 @@ function KnittingEditor(props: any) {
         if (oldMasksPer10Cm === Settings.masksPer10Cm) return;
         Settings.updateCanvasDimensions()
         resetCanvas()
-        unCachePattern()
-        loadGrid(props.selectedPattern, setGrid) //Re-select pattern
+        unCacheDraw()
+        loadGrid(props.selectedSweaterPart, setGrid) //Re-select sweaterPart
     }
 
     const colors = ["white", "red", "black"]

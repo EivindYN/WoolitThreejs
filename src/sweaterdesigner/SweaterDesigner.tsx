@@ -3,14 +3,14 @@ import './SweaterDesigner.css';
 
 import KnittingPreview from './knittingpreview/KnittingPreview';
 import KnittingEditor from './knittingeditor/KnittingEditor';
-import { Pattern } from './pattern';
+import { SweaterPart } from './SweaterPart';
 
 function SweaterDesigner() {
 
-    const [selectedPattern, setSelectedPattern] = useState<Pattern | undefined>(undefined);
+    const [selectedSweaterPart, setSelectedSweaterPart] = useState<SweaterPart | undefined>(undefined);
     return (
         <div style={{ display: "flex" }}>
-            {!selectedPattern &&
+            {!selectedSweaterPart &&
                 <div
                     style={{
                         position: "absolute",
@@ -27,10 +27,10 @@ function SweaterDesigner() {
                 </div>
             }
             <KnittingEditor
-                selectedPattern={selectedPattern}
+                selectedSweaterPart={selectedSweaterPart}
             />
             <KnittingPreview
-                setSelectedPattern={setSelectedPattern}
+                setSelectedSweaterPart={setSelectedSweaterPart}
             />
         </div>
     );

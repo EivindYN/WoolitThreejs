@@ -1,18 +1,18 @@
 import { start } from 'repl';
-import { Pattern } from '../pattern';
+import { SweaterPart } from '../SweaterPart';
 import { Settings } from '../settings';
 
 let maskWidth = Settings.maskWidth
 let maskHeight = Settings.maskHeight
 
 let shirt_uv: HTMLImageElement
-export let setupPattern: Pattern | undefined
+export let setupSweaterPart: SweaterPart | undefined
 
 function make2DArray(x: number, y: number) {
     return new Array(y).fill(0).map(() => new Array(x).fill(0))
 }
 
-let grid: any[][] //NB, should change depending on pattern
+let grid: any[][]
 
 export function getGrid() {
     let shallowGrid = []
@@ -47,24 +47,24 @@ function distance(num1: number, num2: number) {
     return Math.abs(num1 - num2)
 }
 
-export function drawSelection(pattern: any, x: any, y: any) {
+export function drawSelection(sweaterPart: any, x: any, y: any) {
     let selectedX = x
     let selectedY = y
-    draw(pattern, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
+    draw(sweaterPart, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
 }
 
-/*export function addSelection(pattern: any, x: any, y: any) {
+/*export function addSelection(sweaterPart: any, x: any, y: any) {
     let selectedX = x
     let selectedY = y
-    draw(pattern, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
+    draw(sweaterPart, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2, true)
 }
 
-/*export function removeSelection(pattern: any) {
+/*export function removeSelection(sweaterPart: any) {
     let selectedX = state.selectedTilePos[0]
     let selectedY = state.selectedTilePos[1]
     let temp = [...state.selectedTilePos]
     state.selectedTilePos = [-999, -999]
-    draw(pattern, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2)
+    draw(sweaterPart, selectedX - 1, selectedY - 1, selectedX + 2, selectedY + 2)
     state.selectedTilePos = [...temp]
 }*/
 let dx: any
@@ -81,11 +81,11 @@ let imageData: any
 let sizeX: any
 let sizeY: any
 
-function clearPattern() {
+function clearGrid() {
     grid = make2DArray(Settings.gridSizeX, Settings.gridSizeY)
 }
 
-function calculateGridSize(pattern: any) {
+function calculateGridSize(sweaterPart: any) {
     const startX = dx
     const startY = dy
     const endX = sizeX + dx
@@ -122,25 +122,25 @@ function isMask(x: number, y: number) {
     return NW || NE || SW || SE //Do four corner checks, and adjust output depending
 }
 
-function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
-    if (setupPattern !== pattern) {
+function draw(sweaterPart: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
+    if (setupSweaterPart !== sweaterPart) {
         dx = 2
         dy = 2
-        startXPixel = pattern.corner1X * 4096
-        startYPixel = pattern.corner1Y * 4096
-        let endXPixel = pattern.corner2X * 4096
-        let endYPixel = pattern.corner2Y * 4096
+        startXPixel = sweaterPart.corner1X * 4096
+        startYPixel = sweaterPart.corner1Y * 4096
+        let endXPixel = sweaterPart.corner2X * 4096
+        let endYPixel = sweaterPart.corner2Y * 4096
         scaleX = 4096 / Settings.canvasWidth
         scaleY = 4096 / Settings.canvasHeight
         sizeX = Math.ceil((endXPixel - startXPixel) / (maskWidth * scaleX))
         sizeY = Math.ceil((endYPixel - startYPixel) / (maskHeight * scaleY))
 
-        setupPattern = pattern
+        setupSweaterPart = sweaterPart
 
-        const gridSizes = calculateGridSize(pattern)
+        const gridSizes = calculateGridSize(sweaterPart)
         Settings.gridSizeX = gridSizes[0]
         Settings.gridSizeY = gridSizes[1]
-        clearPattern()
+        clearGrid()
     }
 
     startX = Math.max(dx, startX)
@@ -152,19 +152,19 @@ function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number
         for (let y = startY; y < endY; y += 1) {
             if (isMask(x, y)) {
                 if (isSelected) {
-                    pattern.pattern[y - dy][x - dx] = 2
+                    sweaterPart.grid[y - dy][x - dx] = 2
                 }
-                grid[y][x] = pattern.pattern[y - dy][x - dx]
+                grid[y][x] = sweaterPart.grid[y - dy][x - dx]
             }
         }
     }
 }
 
-export function unCachePattern() {
-    setupPattern = undefined
+export function unCacheDraw() {
+    setupSweaterPart = undefined
 }
 
-export function onLoadImages(pattern: any, setGrid: any) {
+export function onLoadImages(sweaterPart: any, setGrid: any) {
     let canvas: HTMLCanvasElement = document.createElement("canvas");
     canvas.width = 4096;
     canvas.height = 4096;
@@ -172,18 +172,18 @@ export function onLoadImages(pattern: any, setGrid: any) {
     ctx.drawImage(shirt_uv, 0, 0)
     imageData = ctx.getImageData(0, 0, 4096, 4096)
 
-    draw(pattern)
+    draw(sweaterPart)
     setGrid(getGrid())
 }
 
-export function loadGrid(pattern: Pattern, setGrid: any) {
+export function loadGrid(sweaterPart: SweaterPart, setGrid: any) {
     let waitForLoad = loadImages()
 
     for (let image of waitForLoad) {
         image.onload = () => {
             waitForLoad.pop()
             if (waitForLoad.length === 0) {
-                onLoadImages(pattern, setGrid)
+                onLoadImages(sweaterPart, setGrid)
             }
         }
     }

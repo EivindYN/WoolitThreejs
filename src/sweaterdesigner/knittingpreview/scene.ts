@@ -9,32 +9,35 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 //import Detector from "three/examples/js/Detector.js"; 
 
-import { Pattern } from '../pattern';
+import { SweaterPart } from '../SweaterPart';
 // @ts-ignore
 import { createCanvas, loadImages, renderAfterLoad, drawCanvas } from './texturecanvas';
 import { Settings } from '../settings';
 
 let pointer: THREE.Vector2;
-let selectedPattern: Pattern | undefined;
+let selectedSweaterPart: SweaterPart | undefined;
 let material: THREE.MeshBasicMaterial;
 let scene: THREE.Scene;
 let texture_canvas: HTMLCanvasElement;
 let colors: string[];
-let patterns: Pattern[];
+let sweaterParts: SweaterPart[];
 let camera: THREE.PerspectiveCamera;
 let renderer: THREE.WebGLRenderer;
 let last_resize: Date;
 let repeatY: boolean;
 let waitForLoad: HTMLImageElement[];
 let raycaster = new THREE.Raycaster();
-let setSelectedPattern: any;
+let setSelectedSweaterPart: any;
 
 let moveCounter: number
 let updateCanvasNextFrame: boolean;
-let updatedPattern: Pattern | undefined;
+let updatedSweaterPart: SweaterPart | undefined;
 
-export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_arg: string[], setSelectedPattern_arg: any) {
-    setSelectedPattern = setSelectedPattern_arg
+export function makeScene(element: HTMLElement, sweaterParts_arg: SweaterPart[], colors_arg: string[], setSelectedSweaterPart_arg: any) {
+    setSelectedSweaterPart = setSelectedSweaterPart_arg
+    sweaterParts = sweaterParts_arg
+    colors = colors_arg
+
     texture_canvas = createCanvas();
     material = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide
@@ -42,12 +45,11 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
     scene = new THREE.Scene();
     let colorsHex = []
     let ctx = texture_canvas.getContext("2d")!!;
-    for (let color of colors_arg) {
+    for (let color of colors) {
         ctx.fillStyle = color
         colorsHex.push(ctx.fillStyle)
     }
     colors = colorsHex
-    patterns = pattern_arg
     camera = new THREE.PerspectiveCamera(50, 1000 / 1000, 1, 2000);
     renderer = new THREE.WebGLRenderer({
         antialias: true
@@ -103,7 +105,7 @@ export function makeScene(element: HTMLElement, pattern_arg: Pattern[], colors_a
             waitForLoad.pop()
             if (waitForLoad.length === 0) {
                 renderAfterLoad(texture_canvas, colors)
-                //drawCanvas(texture_canvas, pattern, colors, repeatY, selectedPattern);
+                //drawCanvas(texture_canvas, SweaterPart, colors, repeatY, selectedSweaterPart);
                 updateCanvas()
             }
         }
@@ -143,7 +145,7 @@ function onPointerMove(event: { clientX: number; clientY: number; }) {
 
 function onClick(_: any) {
     if (moveCounter <= 1 && pointer.x > -1) { //NB
-        setSelectedPattern(selectedPattern)
+        setSelectedSweaterPart(selectedSweaterPart)
     }
 }
 
@@ -156,31 +158,31 @@ function render() {
 
     // calculate objects intersecting the picking ray
     const intersects = raycaster.intersectObjects(scene.children, false);
-    let oldSelectedPattern = selectedPattern
-    selectedPattern = undefined
+    let oldSelectedSweaterPart = selectedSweaterPart
+    selectedSweaterPart = undefined
     for (let i = 0; i < intersects.length; i++) {
         let uv = intersects[i].uv!!;
 
-        for (let n = 0; n < patterns.length; n++) {
-            let target = patterns[n]
+        for (let n = 0; n < sweaterParts.length; n++) {
+            let target = sweaterParts[n]
             let insideX = uv.x < target.corner2X && uv.x > target.corner1X;
             let insideY = uv.y < target.corner2Y && uv.y > target.corner1Y;
             if (insideX && insideY) {
-                selectedPattern = patterns[n]
+                selectedSweaterPart = sweaterParts[n]
             }
         }
         //intersects[i].object.material.color.set(0xff0000);
     }
-    if (oldSelectedPattern != selectedPattern || updateCanvasNextFrame) {
+    if (oldSelectedSweaterPart != selectedSweaterPart || updateCanvasNextFrame) {
         updateCanvas()
         updateCanvasNextFrame = false;
     }
 }
 
-export function setUpdateCanvasNextFrame(updatedPattern_arg: Pattern | undefined = undefined) {
+export function setUpdateCanvasNextFrame(updatedSweaterPart_arg: SweaterPart | undefined = undefined) {
     updateCanvasNextFrame = true;
-    if (updatedPattern_arg !== undefined) {
-        updatedPattern = updatedPattern_arg
+    if (updatedSweaterPart_arg !== undefined) {
+        updatedSweaterPart = updatedSweaterPart_arg
     }
 }
 
@@ -210,10 +212,10 @@ export function resetCanvas() {
 function updateCanvas() {
     if (texture_canvas) {
         requestAnimationFrame(() => {
-            let patterns_arg = updatedPattern ? updatedPattern : patterns
-            drawCanvas(texture_canvas, patterns, colors, repeatY, selectedPattern);
+            let sweaterParts_arg = updatedSweaterPart ? updatedSweaterPart : sweaterParts
+            drawCanvas(texture_canvas, sweaterParts, colors, repeatY, selectedSweaterPart);
             material.map!!.needsUpdate = true;
-            updatedPattern = undefined
+            updatedSweaterPart = undefined
         });
     }
 }

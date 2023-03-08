@@ -1,6 +1,6 @@
 // @ts-ignore
 import { hexToRgb, lighten_color } from './colorutil.ts'
-import { Pattern } from '../pattern';
+import { SweaterPart } from '../SweaterPart';
 import { Settings } from '../settings'
 
 let maskWidth = Settings.maskWidth
@@ -51,10 +51,10 @@ export function createPrerender(colors_arg: any[]) {
 
 export function drawCanvas(
     canvas: any,
-    patterns_arg: Pattern[],
+    sweaterParts_arg: SweaterPart[],
     colors: any[],
     repeatY: boolean,
-    selectedPattern: Pattern | undefined
+    selectedSweaterPart: SweaterPart | undefined
 ) {
     if (prerender === null) {
         prerender = createPrerender(colors);
@@ -62,12 +62,12 @@ export function drawCanvas(
 
     let ctx = canvas.getContext("2d");
 
-    for (let pattern of patterns_arg) {
-        let patternHeight = pattern.pattern.length;
-        let patternWidth = pattern.pattern[0].length;
+    for (let sweaterPart of sweaterParts_arg) {
+        let sweaterPartHeight = sweaterPart.grid.length;
+        let sweaterPartWidth = sweaterPart.grid[0].length;
 
-        let width = (pattern.corner2X - pattern.corner1X) * canvas.width;
-        let height = (pattern.corner2Y - pattern.corner1Y) * canvas.height;
+        let width = (sweaterPart.corner2X - sweaterPart.corner1X) * canvas.width;
+        let height = (sweaterPart.corner2Y - sweaterPart.corner1Y) * canvas.height;
 
         let mask_n_x = Math.floor(width / maskWidth);
         let mask_n_y = Math.floor(height / maskHeight);
@@ -77,22 +77,22 @@ export function drawCanvas(
                 let color;
                 let y_;
                 if (repeatY) {
-                    y_ = y % patternHeight;
+                    y_ = y % sweaterPartHeight;
                 } else {
                     y_ = y;
                 }
-                if (pattern.pattern[y_]) {
-                    color = colors[pattern.pattern[y_][x % patternWidth]];
+                if (sweaterPart.grid[y_]) {
+                    color = colors[sweaterPart.grid[y_][x % sweaterPartWidth]];
                 } else {
                     color = colors[0];
                 }
-                if (selectedPattern === pattern) {
+                if (selectedSweaterPart === sweaterPart) {
                     color = lighten_color(color)
                 }
                 ctx.drawImage(
                     prerender.canvases[color],
-                    x * (maskWidth) + pattern.corner1X * canvas.width,
-                    y * (maskHeight) + pattern.corner1Y * canvas.height
+                    x * (maskWidth) + sweaterPart.corner1X * canvas.width,
+                    y * (maskHeight) + sweaterPart.corner1Y * canvas.height
                 );
             }
         }

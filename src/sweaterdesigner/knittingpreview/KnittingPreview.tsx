@@ -2,34 +2,34 @@ import React from 'react';
 
 import { useEffect } from 'react'
 import { makeScene } from "./scene";
-import { Pattern } from "../pattern";
+import { SweaterPart } from "../SweaterPart";
 
 function KnittingPreview(props: any) {
 
     function onLoad() {
-        let pattern: number[][] = []
+        let grid: number[][] = []
         for (let y = 0; y < 146 * 4; y++) {
-            let pattern_int: [] = []
-            pattern.push(pattern_int)
+            let grid_int: [] = []
+            grid.push(grid_int)
             for (let x = 0; x < 128 * 4; x++) {
-                pattern[y].push((x + y) % 2)
+                grid[y].push((x + y) % 2)
             }
         }
-        let pattern2: number[][] = []
+        let grid2: number[][] = []
         for (let y = 0; y < 146 * 8; y++) {
-            let pattern_int: [] = []
-            pattern2.push(pattern_int)
+            let grid_int: [] = []
+            grid2.push(grid_int)
             for (let x = 0; x < 128 * 8; x++) {
-                pattern2[y].push((x + y) % 2)
+                grid2[y].push((x + y) % 2)
             }
         }
         // 2128, 1986, 3826, 4025
-        let leftArm = new Pattern("leftArm", pattern, 371 / 4096, 60 / 4096, 1714 / 4096, 1732 / 4096);
-        let front = new Pattern("front", pattern2, 2128 / 4096, 1986 / 4096, 3826 / 4096, 4020 / 4096);
+        let leftArm = new SweaterPart("leftArm", grid, 371 / 4096, 60 / 4096, 1714 / 4096, 1732 / 4096);
+        let front = new SweaterPart("front", grid2, 2128 / 4096, 1986 / 4096, 3826 / 4096, 4020 / 4096);
 
         let element = document.getElementById('canvas')!!
 
-        makeScene(element, [leftArm, front], ['white', 'red', 'black'], props.setSelectedPattern);
+        makeScene(element, [leftArm, front], ['white', 'red', 'black'], props.setSelectedSweaterPart);
     }
 
     useEffect(() => {
