@@ -12,7 +12,7 @@ function make2DArray(x: number, y: number) {
     return new Array(y).fill(0).map(() => new Array(x).fill(0))
 }
 
-let grid: any[][] = make2DArray(Settings.gridSize, Settings.gridSize) //NB, should change depending on pattern
+let grid: any[][] //NB, should change depending on pattern
 
 export function getGrid() {
     let shallowGrid = []
@@ -82,14 +82,50 @@ let sizeX: any
 let sizeY: any
 
 function clearPattern() {
-    grid = make2DArray(Settings.gridSize, Settings.gridSize)
+    grid = make2DArray(Settings.gridSizeX, Settings.gridSizeY)
+}
+
+function calculateGridSize(pattern: any) {
+    const startX = dx
+    const startY = dy
+    const endX = sizeX + dx
+    const endY = sizeY + dy
+
+    let highestX = 0
+    let highestY = 0
+    for (let x = startX; x < endX; x += 1) {
+        for (let y = startY; y < endY; y += 1) {
+            if (isMask(x, y)) { //Do four corner checks, and adjust output depending
+                if (x > highestX) {
+                    highestX = x
+                }
+                if (y > highestY) {
+                    highestY = y
+                }
+            }
+        }
+    }
+    highestX += dx + 1
+    highestY += dy + 1
+    return [highestX, highestY]
+}
+
+function isMask(x: number, y: number) {
+    let xPixel = Math.round((x - dx) * scaleX * maskWidth + startXPixel)
+    let yPixel = Math.round((y - dy) * scaleY * maskHeight + startYPixel)
+    //x and y have to be scaled if canvas.width != 4096
+    //NB: Consider caching this 
+    let NW = pixelData(imageData, xPixel, yPixel) >= 128
+    let NE = pixelData(imageData, xPixel + maskWidth, yPixel) >= 128
+    let SW = pixelData(imageData, xPixel, yPixel + maskHeight) >= 128
+    let SE = pixelData(imageData, xPixel + maskWidth, yPixel + maskHeight) >= 128
+    return NW || NE || SW || SE //Do four corner checks, and adjust output depending
 }
 
 function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number = Infinity, endY: number = Infinity, isSelected: boolean = false) {
     if (setupPattern !== pattern) {
-        clearPattern()
-        dx = 10
-        dy = 0
+        dx = 2
+        dy = 2
         startXPixel = pattern.corner1X * 4096
         startYPixel = pattern.corner1Y * 4096
         let endXPixel = pattern.corner2X * 4096
@@ -99,13 +135,12 @@ function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number
         sizeX = Math.ceil((endXPixel - startXPixel) / (maskWidth * scaleX))
         sizeY = Math.ceil((endYPixel - startYPixel) / (maskHeight * scaleY))
 
-        let canvas: HTMLCanvasElement = document.createElement("canvas");
-        canvas.width = 4096;
-        canvas.height = 4096;
-        let ctx = canvas.getContext("2d")!!
-        ctx.drawImage(shirt_uv, 0, 0)
-        imageData = ctx.getImageData(0, 0, 4096, 4096)
         setupPattern = pattern
+
+        const gridSizes = calculateGridSize(pattern)
+        Settings.gridSizeX = gridSizes[0]
+        Settings.gridSizeY = gridSizes[1]
+        clearPattern()
     }
 
     startX = Math.max(dx, startX)
@@ -115,15 +150,7 @@ function draw(pattern: any, startX: number = 0, startY: number = 0, endX: number
 
     for (let x = startX; x < endX; x += 1) {
         for (let y = startY; y < endY; y += 1) {
-            let xPixel = Math.round((x - dx) * scaleX * maskWidth + startXPixel)
-            let yPixel = Math.round((y - dy) * scaleY * maskHeight + startYPixel)
-            //x and y have to be scaled if canvas.width != 4096
-            //NB: Consider caching this 
-            let NW = pixelData(imageData, xPixel, yPixel) >= 128
-            let NE = pixelData(imageData, xPixel + maskWidth, yPixel) >= 128
-            let SW = pixelData(imageData, xPixel, yPixel + maskHeight) >= 128
-            let SE = pixelData(imageData, xPixel + maskWidth, yPixel + maskHeight) >= 128
-            if (NW || NE || SW || SE) { //Do four corner checks, and adjust output depending
+            if (isMask(x, y)) {
                 if (isSelected) {
                     pattern.pattern[y - dy][x - dx] = 2
                 }
@@ -138,6 +165,13 @@ export function unCachePattern() {
 }
 
 export function onLoadImages(pattern: any, setGrid: any) {
+    let canvas: HTMLCanvasElement = document.createElement("canvas");
+    canvas.width = 4096;
+    canvas.height = 4096;
+    let ctx = canvas.getContext("2d")!!
+    ctx.drawImage(shirt_uv, 0, 0)
+    imageData = ctx.getImageData(0, 0, 4096, 4096)
+
     draw(pattern)
     setGrid(getGrid())
 }
