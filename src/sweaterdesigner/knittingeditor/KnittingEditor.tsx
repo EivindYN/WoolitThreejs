@@ -141,23 +141,37 @@ function KnittingEditor(props: any) {
                 <img src="brush.png" style={{ width: "30px" }}></img>
             </div>*/}
             <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                <div style={{ backgroundColor: "rgba(0,0,0,0.1)", borderRadius: 10, width: "200px", display: "flex", justifyContent: "flex-start" }}>
-                    <div className='buttonContainer'>
-                        <button style={{ margin: "10px" }} onClick={() => setShowBrushPopup(true)}>
+                <div style={{
+                    marginLeft: "10px",
+                    paddingTop: "5px",
+                    marginTop: "5px",
+                    height: "55px",
+                    backgroundColor: "rgba(237,233,230,1)",
+                    width: "60px",
+                    display: "flex",
+                    borderTopLeftRadius: "10px",
+                    borderTopRightRadius: "10px",
+                    border: "0.5px solid rgba(0,0,0,0.1)",
+                    borderBottom: "none",
+                    flexDirection: "column"
+                }}>
+                    {/*
+                    marginLeft: "10px",
+                    marginTop: "10px",
+                    height: "56px",
+                    backgroundColor: "rgba(0,0,0,0.05)",
+                    width: "46px",
+                    display: "flex",
+                    borderRadius: "10px",
+                    flexDirection: "column"
+                    */}
+                    <div className='buttonContainer' style={{ alignSelf: "center" }}>
+                        <button style={{ margin: "0px" }} onClick={() => setShowBrushPopup(true)}>
                             <img src="brush.png" style={{ width: "30px" }}></img>
                         </button>
                     </div>
-                    <hr />
-                    <div style={{ display: "flex" }}>
-                        <p style={{ margin: "auto" }}>
-                            Color:
-                        </p>
-                        <div className='buttonContainer'>
-                            <button className='small' style={{ margin: "10px" }} onClick={() => setShowBrushPopup(true)}>
-
-                            </button>
-                        </div>
-                    </div>
+                    {/*<img src="arrow_down.png" style={{ opacity: 0.5, width: "10px", margin: "auto", marginTop: "-3px" }}></img>*/}
+                    <div style={{ width: "80%", margin: "auto", height: "2.5px", backgroundColor: "rgba(0,0,0,0.2)" }}></div>
                 </div>
                 <div className='buttonContainer'>
                     <button>
@@ -179,7 +193,28 @@ function KnittingEditor(props: any) {
                     </button>
                 </div>
             </div >
-            <div className="box" style={{ margin: "10px", height: "87.5vh", overflow: "scroll" }}>
+            <div style={{
+                backgroundColor: "rgba(237,233,230,1)",
+                marginLeft: "10px",
+                borderRadius: "5px",
+                borderTopLeftRadius: "0px",
+                marginTop: "-5px",
+                padding: "5px",
+                border: "0.5px solid rgba(0,0,0,0.1)"
+            }}>
+                <div className='buttonContainer' >
+                    <button className='small' style={{ marginLeft: "0px", marginTop: "3px", marginBottom: "3px" }} onClick={() => changeMaskSize("S")}>
+                        S
+                    </button>
+                    <button className='small' style={{ marginTop: "3px", marginBottom: "3px" }} onClick={() => changeMaskSize("M")}>
+                        M
+                    </button>
+                    <button className='small' style={{ marginTop: "3px", marginBottom: "3px" }} onClick={() => changeMaskSize("L")}>
+                        L
+                    </button>
+                </div>
+            </div>
+            <div className="box" style={{ margin: "10px", height: "82.5vh", overflow: "scroll" }}>
                 <div style={{ margin: "0px" }}>
                     {grid.map((gridY, y) =>
                         <div style={{ display: "flex" }} key={y}>
