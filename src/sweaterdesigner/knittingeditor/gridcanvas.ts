@@ -185,7 +185,11 @@ function drawRepeat(
         for (let y = startY; y < endY; y += 1) {
             const patternY = y - startY;
             const patternX = mod(x - startX - xMod, xLen)
-            sweaterPart.grid[y - dy][x - dx] = pattern!!.grid[patternY][patternX]
+
+            const brushColor = pattern!!.grid[patternY][patternX]
+            if (brushColor !== -1) {
+                sweaterPart.grid[y - dy][x - dx] = brushColor
+            }
 
             const isInGrid = x >= minLimitXDraw && x < maxLimitXDraw
             if (isInGrid && isMask(x, y)) {
@@ -218,7 +222,10 @@ export function draw(
                 if (pattern) {
                     const patternY = y - startY;
                     const patternX = x - startX;
-                    sweaterPart.grid[y - dy][x - dx] = pattern.grid[patternY][patternX]
+                    const brushColor = pattern.grid[patternY][patternX]
+                    if (brushColor !== -1) {
+                        sweaterPart.grid[y - dy][x - dx] = brushColor
+                    }
                 }
                 grid[y][x] = sweaterPart.grid[y - dy][x - dx]
             }

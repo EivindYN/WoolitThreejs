@@ -46,7 +46,7 @@ function KnittingEditor(props: any) {
         brushImg!!.style.marginTop = event.clientY + "px"
     }
 
-    function drawBrush(endX: any, endY: any) {
+    function drawBrush(pattern: Pattern, endX: any, endY: any) {
         let startX = lastPos[0]
         let startY = lastPos[1]
         let numDraw = Math.max(Math.abs(endY - startY), Math.abs(endX - startX)) + 1
@@ -54,12 +54,6 @@ function KnittingEditor(props: any) {
             let x = startX + Math.round((endX - startX) * n / numDraw)
             let y = startY + Math.round((endY - startY) * n / numDraw)
             lastPos = [x, y]
-            let grid = [
-                [2, 2, 2],
-                [2, 2, 2],
-                [2, 2, 2]
-            ]
-            let pattern = new Pattern(grid)
             drawSelection(props.selectedSweaterPart, pattern, x, y, false)
         }
         setGrid(getGrid())
@@ -68,28 +62,32 @@ function KnittingEditor(props: any) {
 
     function onMouseOver(endX: any, endY: any, end: boolean) {
         if (!props.selectedSweaterPart) return;
-        const useBrush = false
-        if (useBrush) {
-            drawBrush(endX, endY);
+        let repeatMode;
+        switch (repeat) {
+            case 1: repeatMode = RepeatMode.NONE; break;
+            case 2: repeatMode = RepeatMode.ONE; break;
+            case 3: repeatMode = RepeatMode.BOTH; break;
+            case 4: repeatMode = RepeatMode.ALL; break;
         }
-        const usePattern = !useBrush
-        const repeatMode = RepeatMode.ALL
-        let sweaterParts = []
+        let sweaterParts: SweaterPart[];
         switch (repeatMode) {
-            //case RepeatMode.ONE: sweaterParts = [props.selectedSweaterPart]; break;
+            case RepeatMode.ONE: sweaterParts = [props.selectedSweaterPart]; break;
+            case RepeatMode.BOTH: sweaterParts = []; break; //TODO
             case RepeatMode.ALL: sweaterParts = getSweaterParts(); break;
+            default: sweaterParts = []; break;
         }
-        console.log(sweaterParts)
-        if (usePattern) {
-            let grid = [
-                [0, 1, 1, 0],
-                [1, 1, 1, 1],
-                [1, 1, 1, 1],
-                [0, 1, 1, 0]
-            ]
-            let pattern = new Pattern(grid)
-            if (end)
-                drawPattern(pattern, endX, endY, sweaterParts);
+        let grid = [
+            [-1, 2, 2, -1],
+            [2, 2, 2, 2],
+            [2, 2, 2, 2],
+            [-1, 2, 2, -1]
+        ]
+        let pattern = new Pattern(grid)
+        if (repeatMode == RepeatMode.NONE) {
+            drawBrush(pattern, endX, endY);
+        }
+        else if (end) {
+            drawPattern(pattern, endX, endY, sweaterParts);
         }
     }
 
@@ -219,7 +217,7 @@ function KnittingEditor(props: any) {
                         style={{ height: "30px", marginTop: "auto", marginBottom: "auto", backgroundColor: "white" }}
                         onChange={(e) => setRepeat(e.target.value as number)}
                     >
-                        <MenuItem value={1}>No</MenuItem>
+                        <MenuItem value={1}>None</MenuItem>
                         <MenuItem value={2}>Arm</MenuItem>
                         <MenuItem value={3}>Arms</MenuItem>
                         <MenuItem value={4}>Arms & Torso</MenuItem>
