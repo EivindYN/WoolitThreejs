@@ -19,7 +19,8 @@ function SweaterDesigner() {
                         display: "flex",
                         backgroundColor: "black",
                         opacity: 0.6,
-                        borderRadius: "3px"
+                        borderRadius: "3px",
+                        zIndex: 1
                     }}>
                     <div style={{ margin: "auto", fontSize: "20px", color: "white", fontWeight: 100 }}>
                         Click on any part of the sweater to start

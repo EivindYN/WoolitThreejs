@@ -8,6 +8,10 @@ import { Pattern } from '../Pattern';
 import { Settings } from '../settings'
 import { SweaterPart } from '../SweaterPart';
 import { loadGrid, state, onLoadImages, drawSelection, getGrid, unCacheDraw, draw } from './gridcanvas';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
 
 let pos: number[][] = []
 let lastPos: number[] = []
@@ -21,6 +25,7 @@ function KnittingEditor(props: any) {
     const [grid, setGrid] = useState(make2DArray(Settings.gridSizeX, Settings.gridSizeY)); //NB, should change depending on pattern
     const [brush, setBrush] = useState(undefined)
     const [showBrushPopup, setShowBrushPopup] = useState(false)
+    const [repeat, setRepeat] = useState(1)
     const [posUpdated, setPosUpdated] = useState(false)
 
     let brushImg: HTMLElement | null;
@@ -124,7 +129,7 @@ function KnittingEditor(props: any) {
                         marginTop: "70px",
                         width: "300px",
                         height: "80px",
-                        backgroundColor: "white"
+                        backgroundColor: "white",
                     }}>
                     <div style={{ display: "flex" }}>
                         <button onClick={() => setShowBrushPopup(false)}>
@@ -200,19 +205,26 @@ function KnittingEditor(props: any) {
                 borderTopLeftRadius: "0px",
                 marginTop: "-5px",
                 padding: "5px",
-                border: "0.5px solid rgba(0,0,0,0.1)"
+                border: "0.5px solid rgba(0,0,0,0.1)",
+                display: "flex"
             }}>
-                <div className='buttonContainer' >
-                    <button className='small' style={{ marginLeft: "0px", marginTop: "3px", marginBottom: "3px" }} onClick={() => changeMaskSize("S")}>
-                        S
-                    </button>
-                    <button className='small' style={{ marginTop: "3px", marginBottom: "3px" }} onClick={() => changeMaskSize("M")}>
-                        M
-                    </button>
-                    <button className='small' style={{ marginTop: "3px", marginBottom: "3px" }} onClick={() => changeMaskSize("L")}>
-                        L
-                    </button>
-                </div>
+                <p style={{ margin: "10px" }}>
+                    Repeat:
+                </p>
+                <FormControl >
+                    <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={repeat}
+                        style={{ height: "30px", marginTop: "auto", marginBottom: "auto", backgroundColor: "white" }}
+                        onChange={(e) => setRepeat(e.target.value as number)}
+                    >
+                        <MenuItem value={1}>No</MenuItem>
+                        <MenuItem value={2}>Arm</MenuItem>
+                        <MenuItem value={3}>Arms</MenuItem>
+                        <MenuItem value={4}>Arms & Torso</MenuItem>
+                    </Select>
+                </FormControl>
             </div>
             <div className="box" style={{ margin: "10px", height: "82.5vh", overflow: "scroll" }}>
                 <div style={{ margin: "0px" }}>
