@@ -1,10 +1,13 @@
 import React from 'react';
 
 import { useEffect, useState } from 'react'
-import { resetCanvas, setUpdateCanvasNextFrame } from '../knittingpreview/scene';
+import { RepeatMode } from '../enums';
+import { getSweaterParts, resetCanvas, setUpdateCanvasNextFrame } from '../knittingpreview/scene';
 import { createCanvas } from '../knittingpreview/texturecanvas';
+import { Pattern } from '../Pattern';
 import { Settings } from '../settings'
-import { loadGrid, state, onLoadImages, drawSelection, getGrid, unCacheDraw } from './gridcanvas';
+import { SweaterPart } from '../SweaterPart';
+import { loadGrid, state, onLoadImages, drawSelection, getGrid, unCacheDraw, draw } from './gridcanvas';
 
 let pos: number[][] = []
 let lastPos: number[] = []
@@ -46,22 +49,52 @@ function KnittingEditor(props: any) {
             let x = startX + Math.round((endX - startX) * n / numDraw)
             let y = startY + Math.round((endY - startY) * n / numDraw)
             lastPos = [x, y]
-            drawSelection(props.selectedSweaterPart, x, y)
+            let grid = [
+                [2, 2, 2],
+                [2, 2, 2],
+                [2, 2, 2]
+            ]
+            let pattern = new Pattern(grid)
+            drawSelection(props.selectedSweaterPart, pattern, x, y, false)
         }
         setGrid(getGrid())
         setUpdateCanvasNextFrame(props.selectedSweaterPart)
     }
 
-    function onMouseOver(endX: any, endY: any) {
+    function onMouseOver(endX: any, endY: any, end: boolean) {
         if (!props.selectedSweaterPart) return;
-        const brush = false
-        if (brush) {
+        const useBrush = false
+        if (useBrush) {
             drawBrush(endX, endY);
         }
-        const pattern = true
-        if (pattern) {
-
+        const usePattern = !useBrush
+        const repeatMode = RepeatMode.ALL
+        let sweaterParts = []
+        switch (repeatMode) {
+            //case RepeatMode.ONE: sweaterParts = [props.selectedSweaterPart]; break;
+            case RepeatMode.ALL: sweaterParts = getSweaterParts(); break;
         }
+        console.log(sweaterParts)
+        if (usePattern) {
+            let grid = [
+                [0, 1, 1, 0],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [0, 1, 1, 0]
+            ]
+            let pattern = new Pattern(grid)
+            if (end)
+                drawPattern(pattern, endX, endY, sweaterParts);
+        }
+    }
+
+    function drawPattern(pattern: Pattern, endX: number, endY: number, sweaterParts: SweaterPart[]) {
+        drawSelection(sweaterParts, pattern, endX, endY, true)
+        if (sweaterParts.length !== 1) {
+            draw(props.selectedSweaterPart) //Grid got cleared in drawSelection, so redraw it
+        }
+        setGrid(getGrid())
+        setUpdateCanvasNextFrame(sweaterParts)
     }
 
     function changeMaskSize(size: string) {
@@ -107,10 +140,25 @@ function KnittingEditor(props: any) {
             {/*<div id='brush' style={{ position: "absolute" }}>
                 <img src="brush.png" style={{ width: "30px" }}></img>
             </div>*/}
-            <div style={{ display: "flex" }}>
-                <button style={{ marginRight: "0px" }} onClick={() => setShowBrushPopup(true)}>
-                    <img src="brush.png" style={{ width: "30px" }}></img>
-                </button>
+            <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                <div style={{ backgroundColor: "rgba(0,0,0,0.1)", borderRadius: 10, width: "200px", display: "flex", justifyContent: "flex-start" }}>
+                    <div className='buttonContainer'>
+                        <button style={{ margin: "10px" }} onClick={() => setShowBrushPopup(true)}>
+                            <img src="brush.png" style={{ width: "30px" }}></img>
+                        </button>
+                    </div>
+                    <hr />
+                    <div style={{ display: "flex" }}>
+                        <p style={{ margin: "auto" }}>
+                            Color:
+                        </p>
+                        <div className='buttonContainer'>
+                            <button className='small' style={{ margin: "10px" }} onClick={() => setShowBrushPopup(true)}>
+
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div className='buttonContainer'>
                     <button>
                         <img src="undo.png" style={{ width: "30px" }}></img>
@@ -130,7 +178,7 @@ function KnittingEditor(props: any) {
                         L
                     </button>
                 </div>
-            </div>
+            </div >
             <div className="box" style={{ margin: "10px", height: "87.5vh", overflow: "scroll" }}>
                 <div style={{ margin: "0px" }}>
                     {grid.map((gridY, y) =>
@@ -139,16 +187,16 @@ function KnittingEditor(props: any) {
                                 <div className="grid"
                                     onMouseDown={(_) => {
                                         lastPos = [x, y]
-                                        onMouseOver(x, y)
+                                        onMouseOver(x, y, false)
                                     }}
                                     onMouseUp={(_) => {
-                                        onMouseOver(x, y)
+                                        onMouseOver(x, y, true)
                                     }}
                                     onMouseOver={(e: any) => {
                                         let flags = e.buttons !== undefined ? e.buttons : e.which;
                                         let primaryMouseButtonDown = (flags & 1) === 1;
                                         if (primaryMouseButtonDown)
-                                            onMouseOver(x, y)
+                                            onMouseOver(x, y, false)
                                     }}
                                     style={{ backgroundColor: colors[colorIndex] }} key={colorIndex + "," + x + "," + y}></div>
                             )}

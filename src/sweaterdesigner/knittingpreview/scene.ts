@@ -31,7 +31,7 @@ let setSelectedSweaterPart: any;
 
 let moveCounter: number
 let updateCanvasNextFrame: boolean;
-let updatedSweaterPart: SweaterPart | undefined;
+let updatedSweaterParts: SweaterPart[] = [];
 
 export function makeScene(element: HTMLElement, sweaterParts_arg: SweaterPart[], colors_arg: string[], setSelectedSweaterPart_arg: any) {
     setSelectedSweaterPart = setSelectedSweaterPart_arg
@@ -179,11 +179,9 @@ function render() {
     }
 }
 
-export function setUpdateCanvasNextFrame(updatedSweaterPart_arg: SweaterPart | undefined = undefined) {
+export function setUpdateCanvasNextFrame(updatedSweaterParts_arg: SweaterPart[]) {
     updateCanvasNextFrame = true;
-    if (updatedSweaterPart_arg !== undefined) {
-        updatedSweaterPart = updatedSweaterPart_arg
-    }
+    updatedSweaterParts = updatedSweaterParts_arg
 }
 
 function animate() {
@@ -212,11 +210,15 @@ export function resetCanvas() {
 function updateCanvas() {
     if (texture_canvas) {
         requestAnimationFrame(() => {
-            let sweaterParts_arg = updatedSweaterPart ? [updatedSweaterPart] : sweaterParts
+            let sweaterParts_arg = updatedSweaterParts.length > 0 ? updatedSweaterParts : sweaterParts
             drawCanvas(texture_canvas, sweaterParts_arg, colors, repeatY, selectedSweaterPart);
             material.map!!.needsUpdate = true;
-            updatedSweaterPart = undefined
+            updatedSweaterParts = []
         });
     }
+}
+
+export function getSweaterParts() {
+    return sweaterParts
 }
 
