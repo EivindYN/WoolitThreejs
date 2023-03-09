@@ -23,6 +23,7 @@ function KnittingEditor(props: any) {
     }
 
     const [grid, setGrid] = useState(make2DArray(Settings.gridSizeX, Settings.gridSizeY)); //NB, should change depending on pattern
+    const [repeatOptions, setRepeatOptions] = useState(["None", "", "", ""])
     const [brush, setBrush] = useState(undefined)
     const [showBrushPopup, setShowBrushPopup] = useState(false)
     const [repeat, setRepeat] = useState(1)
@@ -39,6 +40,8 @@ function KnittingEditor(props: any) {
     useEffect(() => {
         if (!props.selectedSweaterPart) return
         loadGrid(props.selectedSweaterPart, setGrid)
+        const thirdRepeatOption = props.selectedSweaterPart.name.includes("Arm") ? "Arms" : "Torso"
+        setRepeatOptions(["None", props.selectedSweaterPart.name, thirdRepeatOption, "Arms & Torso"])
     }, [props.selectedSweaterPart]);
 
     function onPointerMove(event: { clientX: number; clientY: number; }) {
@@ -217,10 +220,9 @@ function KnittingEditor(props: any) {
                         style={{ height: "30px", marginTop: "auto", marginBottom: "auto", backgroundColor: "white" }}
                         onChange={(e) => setRepeat(e.target.value as number)}
                     >
-                        <MenuItem value={1}>None</MenuItem>
-                        <MenuItem value={2}>Arm</MenuItem>
-                        <MenuItem value={3}>Arms</MenuItem>
-                        <MenuItem value={4}>Arms & Torso</MenuItem>
+                        {repeatOptions.map((_, i) =>
+                            <MenuItem value={i + 1}>{repeatOptions[i]}</MenuItem>)
+                        }
                     </Select>
                 </FormControl>
             </div>
