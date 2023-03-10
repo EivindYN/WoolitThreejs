@@ -48,6 +48,30 @@ export function createPrerender(colors_arg: any[]) {
         canvases
     };
 }
+export function darkenCanvas(
+    canvas: HTMLCanvasElement,
+    canvas_backup: HTMLCanvasElement
+) {
+    let ctx = canvas.getContext("2d")!!;
+    ctx.drawImage(canvas_backup, 0, 0);
+}
+
+export function lightenCanvas(
+    canvas: HTMLCanvasElement,
+    selectedSweaterPart: SweaterPart,
+    canvas_backup: HTMLCanvasElement
+) {
+    let ctx_backup = canvas_backup.getContext("2d")!!;
+    ctx_backup.drawImage(canvas, 0, 0)
+
+    let ctx = canvas.getContext("2d")!!;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.25)"
+    const minX = selectedSweaterPart.corner1X * Settings.canvasWidth
+    const minY = selectedSweaterPart.corner1Y * Settings.canvasHeight
+    const maxX = selectedSweaterPart.corner2X * Settings.canvasWidth
+    const maxY = selectedSweaterPart.corner2Y * Settings.canvasHeight
+    ctx.fillRect(minX, minY, maxX, maxY);
+}
 
 export function drawCanvas(
     canvas: any,

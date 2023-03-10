@@ -11,7 +11,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 import { SweaterPart } from '../SweaterPart';
 // @ts-ignore
-import { createCanvas, loadImages, renderAfterLoad, drawCanvas } from './texturecanvas';
+import { createCanvas, loadImages, renderAfterLoad, drawCanvas, lightenCanvas, darkenCanvas } from './texturecanvas';
 import { Settings } from '../settings';
 
 let pointer: THREE.Vector2;
@@ -19,6 +19,7 @@ let selectedSweaterPart: SweaterPart | undefined;
 let material: THREE.MeshBasicMaterial;
 let scene: THREE.Scene;
 let texture_canvas: HTMLCanvasElement;
+let texture_canvas_backup: HTMLCanvasElement;
 let colors: string[];
 let sweaterParts: SweaterPart[];
 let camera: THREE.PerspectiveCamera;
@@ -32,6 +33,7 @@ let setSelectedSweaterPart: any;
 let moveCounter: number
 let updateCanvasNextFrame: boolean;
 let updatedSweaterParts: SweaterPart[] = [];
+let sweaterMesh: THREE.Mesh
 
 export function makeScene(element: HTMLElement, sweaterParts_arg: SweaterPart[], colors_arg: string[], setSelectedSweaterPart_arg: any) {
     setSelectedSweaterPart = setSelectedSweaterPart_arg
@@ -39,6 +41,7 @@ export function makeScene(element: HTMLElement, sweaterParts_arg: SweaterPart[],
     colors = colors_arg
 
     texture_canvas = createCanvas();
+    texture_canvas_backup = createCanvas()
     material = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide
     });
@@ -66,10 +69,10 @@ export function makeScene(element: HTMLElement, sweaterParts_arg: SweaterPart[],
     let loader = new GLTFLoader();
     loader.load("sweater_3.gltf", (gltf: { scene: { children: { geometry: any; }[]; }; }) => {
         let geometry = gltf.scene.children[0].geometry
-        let mesh = new THREE.Mesh(geometry, material);
-        mesh.position.y = -1;
-        mesh.scale.set(5, 5, 5);
-        scene.add(mesh);
+        sweaterMesh = new THREE.Mesh(geometry, material);
+        sweaterMesh.position.y = -1;
+        sweaterMesh.scale.set(5, 5, 5);
+        scene.add(sweaterMesh);
     });
 
     const light = new THREE.AmbientLight(0xFFFFFF); // soft white light
@@ -173,7 +176,15 @@ function render() {
         }
         //intersects[i].object.material.color.set(0xff0000);
     }
-    if (oldSelectedSweaterPart != selectedSweaterPart || updateCanvasNextFrame) {
+    if (oldSelectedSweaterPart != selectedSweaterPart) {
+        //TODO: dont update canvas here, but just lighten the uv
+        if (oldSelectedSweaterPart)
+            darkenCanvas(texture_canvas, texture_canvas_backup)
+        if (selectedSweaterPart)
+            lightenCanvas(texture_canvas, selectedSweaterPart, texture_canvas_backup)
+        material.map!!.needsUpdate = true;
+    }
+    if (updateCanvasNextFrame) {
         updateCanvas()
         updateCanvasNextFrame = false;
     }
@@ -198,6 +209,9 @@ function animate() {
 export function resetCanvas() {
     texture_canvas.width = Settings.canvasWidth
     texture_canvas.height = Settings.canvasHeight
+
+    texture_canvas_backup.width = texture_canvas.width
+    texture_canvas_backup.height = texture_canvas.height
 
 
     material.map = new THREE.Texture(texture_canvas);
