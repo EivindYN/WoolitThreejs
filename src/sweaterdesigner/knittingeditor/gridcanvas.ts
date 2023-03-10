@@ -2,6 +2,7 @@ import { start } from 'repl';
 import { SweaterPart } from '../SweaterPart';
 import { Settings } from '../settings';
 import { Pattern } from '../Pattern';
+import { SweaterPartAreaGroup } from '../enums';
 
 let maskWidth = Settings.maskWidth
 let maskHeight = Settings.maskHeight
@@ -49,7 +50,7 @@ function distance(num1: number, num2: number) {
 }
 
 
-export function drawSelection(sweaterParts: SweaterPart[], pattern: Pattern, x: any, y: any, repeat: boolean) {
+export function drawSelection(sweaterParts: SweaterPart[], pattern: Pattern, x: any, y: any, repeat: boolean, selectedSweaterPart: SweaterPart | undefined = undefined) {
     const anchor = pattern.anchor()
     const length = pattern.length()
     const anchorX = anchor[0]
@@ -58,7 +59,7 @@ export function drawSelection(sweaterParts: SweaterPart[], pattern: Pattern, x: 
     const lengthY = length[1]
     if (repeat) {
         for (let sweaterPart of sweaterParts) {
-            drawRepeat(sweaterPart, x - anchorX, y - anchorY, x - anchorX + lengthX, y - anchorY + lengthY, pattern)
+            drawRepeat(sweaterPart, x - anchorX, y - anchorY, x - anchorX + lengthX, y - anchorY + lengthY, pattern, selectedSweaterPart!!)
         }
     } else {
         draw(sweaterParts[0], x - anchorX, y - anchorY, x - anchorX + lengthX, y - anchorY + lengthY, pattern)
@@ -92,8 +93,6 @@ let imageData: any
 
 let sizeX: any
 let sizeY: any
-
-let offsetY: any
 
 function clearGrid() {
     grid = make2DArray(Settings.gridSizeX, Settings.gridSizeY)
@@ -141,8 +140,8 @@ function mod(n: number, m: number) {
 }
 
 function setupSweaterPart(sweaterPart: SweaterPart) {
-    dx = 2
-    dy = 2
+    dx = 0
+    dy = 0
     startXPixel = sweaterPart.corner1X * 4096
     startYPixel = sweaterPart.corner1Y * 4096
     let endXPixel = sweaterPart.corner2X * 4096
@@ -151,11 +150,6 @@ function setupSweaterPart(sweaterPart: SweaterPart) {
     scaleY = 4096 / Settings.canvasHeight
     sizeX = Math.ceil((endXPixel - startXPixel) / (maskWidth * scaleX))
     sizeY = Math.ceil((endYPixel - startYPixel) / (maskHeight * scaleY))
-
-    offsetY = sweaterPart.offsetY(maskHeight, scaleY)
-
-    console.log(sweaterPart)
-    console.log(offsetY)
 
     prevSetupSweaterPart = sweaterPart
 
@@ -172,17 +166,29 @@ function drawRepeat(
     endX: number = Infinity,
     endY: number = Infinity,
     pattern: Pattern | undefined = undefined,
+    selectedSweaterPart: SweaterPart
 ) {
     if (prevSetupSweaterPart !== sweaterPart) {
         setupSweaterPart(sweaterPart)
     }
-
-    const midY = (startY + endY) / 2
-    startY += Math.round(midY * (1 - sweaterPart.scaleArmY))
-    endY += Math.round(midY * (1 - sweaterPart.scaleArmY))
-    console.log(Math.round(midY * (1 - sweaterPart.scaleArmY)))
-    startY += offsetY
-    endY += offsetY
+    if (selectedSweaterPart !== sweaterPart) {
+        const sweaterPartUse = sweaterPart.isArm() ? selectedSweaterPart : sweaterPart
+        const scaleArmY = sweaterPartUse.scaleArmY
+        const offsetY = sweaterPartUse.offsetY(maskHeight, scaleY)
+        const sign = sweaterPart.isArm() ? -1 : 1
+        if (sweaterPart.isArm()) {
+            startY += offsetY * sign
+            endY += offsetY * sign
+        }
+        const midY = (startY + endY) / 2
+        const scaleAdjust = sweaterPart.isArm() ? 1 - (1 / (1 + (1 - scaleArmY))) : (1 - scaleArmY)
+        startY += Math.round(midY * scaleAdjust) * sign
+        endY += Math.round(midY * scaleAdjust) * sign
+        if (!sweaterPart.isArm()) {
+            startY += offsetY * sign
+            endY += offsetY * sign
+        }
+    }
 
     let minLimitXDraw = dx
     let maxLimitXDraw = sizeX + dx
@@ -192,11 +198,14 @@ function drawRepeat(
     startX = 0
     endX = sweaterPart.grid[0].length
 
-    startY = Math.max(dy, startY)
+    //startY = Math.max(dy, startY)
     endY = Math.min(sizeY + dy, endY)
 
     for (let x = startX; x < endX; x += 1) {
         for (let y = startY; y < endY; y += 1) {
+            if (y < dy) {
+                continue;
+            }
             const patternY = y - startY;
             const patternX = mod(x - startX - xMod, xLen)
 
@@ -224,14 +233,14 @@ export function draw(
         setupSweaterPart(sweaterPart)
     }
 
-    startX = Math.max(dx, startX)
     endX = Math.min(sizeX + dx, endX)
-
-    startY = Math.max(dy, startY)
     endY = Math.min(sizeY + dy, endY)
 
     for (let x = startX; x < endX; x += 1) {
         for (let y = startY; y < endY; y += 1) {
+            if (y < dy || x < dx) {
+                continue;
+            }
             if (isMask(x, y)) {
                 if (pattern) {
                     const patternY = y - startY;

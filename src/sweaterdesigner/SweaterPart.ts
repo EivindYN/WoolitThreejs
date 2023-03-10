@@ -1,5 +1,8 @@
+import { SweaterPartArea, SweaterPartAreaGroup } from "./enums"
+
 export class SweaterPart {
     name: String
+    area: SweaterPartArea
     grid: number[][]
     corner1X: number
     corner1Y: number
@@ -12,6 +15,7 @@ export class SweaterPart {
     //corner       corner2
     constructor(
         name: String,
+        area: SweaterPartArea,
         grid: number[][],
         corner1X: number,
         corner1Y: number,
@@ -21,6 +25,7 @@ export class SweaterPart {
         scaleArmY: number = 1
     ) {
         this.name = name
+        this.area = area
         this.grid = grid
         this.corner1X = corner1X
         this.corner1Y = corner1Y
@@ -38,5 +43,18 @@ export class SweaterPart {
         const topArmYPixel = this.topArmY * 4096
         const corner1YPixel = this.corner1Y * 4096
         return Math.ceil((topArmYPixel - corner1YPixel) / (maskHeight * scaleY))
+    }
+
+    areaGroup() {
+        switch (this.area) {
+            case SweaterPartArea.LeftArm: return SweaterPartAreaGroup.Arm;
+            case SweaterPartArea.RightArm: return SweaterPartAreaGroup.Arm;
+            case SweaterPartArea.FrontTorso: return SweaterPartAreaGroup.Torso;
+            case SweaterPartArea.BackTorso: return SweaterPartAreaGroup.Torso;
+        }
+    }
+
+    isArm() {
+        return this.areaGroup() === SweaterPartAreaGroup.Arm
     }
 }

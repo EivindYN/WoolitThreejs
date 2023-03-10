@@ -4,3 +4,14 @@ export enum RepeatMode {
     BOTH,
     ALL,
 }
+
+export enum SweaterPartArea {
+    LeftArm,
+    RightArm,
+    FrontTorso,
+    BackTorso
+}
+export enum SweaterPartAreaGroup {
+    Arm,
+    Torso
+}

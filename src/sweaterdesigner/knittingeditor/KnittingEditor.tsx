@@ -49,20 +49,6 @@ function KnittingEditor(props: any) {
         brushImg!!.style.marginTop = event.clientY + "px"
     }
 
-    function drawBrush(pattern: Pattern, endX: any, endY: any) {
-        let startX = lastPos[0]
-        let startY = lastPos[1]
-        let numDraw = Math.max(Math.abs(endY - startY), Math.abs(endX - startX)) + 1
-        for (let n = 0; n < numDraw; n++) {
-            let x = startX + Math.round((endX - startX) * n / numDraw)
-            let y = startY + Math.round((endY - startY) * n / numDraw)
-            lastPos = [x, y]
-            drawSelection([props.selectedSweaterPart], pattern, x, y, false)
-        }
-        setGrid(getGrid())
-        setUpdateCanvasNextFrame(props.selectedSweaterPart)
-    }
-
     function onMouseOver(endX: any, endY: any, end: boolean) {
         if (!props.selectedSweaterPart) return;
         let repeatMode;
@@ -94,8 +80,22 @@ function KnittingEditor(props: any) {
         }
     }
 
+    function drawBrush(pattern: Pattern, endX: any, endY: any) {
+        let startX = lastPos[0]
+        let startY = lastPos[1]
+        let numDraw = Math.max(Math.abs(endY - startY), Math.abs(endX - startX)) + 1
+        for (let n = 0; n < numDraw; n++) {
+            let x = startX + Math.round((endX - startX) * n / numDraw)
+            let y = startY + Math.round((endY - startY) * n / numDraw)
+            lastPos = [x, y]
+            drawSelection([props.selectedSweaterPart], pattern, x, y, false)
+        }
+        setGrid(getGrid())
+        setUpdateCanvasNextFrame(props.selectedSweaterPart)
+    }
+
     function drawPattern(pattern: Pattern, endX: number, endY: number, sweaterParts: SweaterPart[]) {
-        drawSelection(sweaterParts, pattern, endX, endY, true)
+        drawSelection(sweaterParts, pattern, endX, endY, true, props.selectedSweaterPart)
         if (sweaterParts.length !== 1) {
             draw(props.selectedSweaterPart) //Grid got cleared in drawSelection, so redraw it
         }
