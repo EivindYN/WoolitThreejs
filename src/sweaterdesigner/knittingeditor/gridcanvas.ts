@@ -191,7 +191,7 @@ function drawRepeat(
             // Math: midY = 800 | 1000, scaleArmY = 0.25
             // 800 * 0.25 = 200
             // 1000 * 0.25 / 1.25 = 200
-            // 200 = 200, correct inversion
+            // 200 = 200 => correct inversion
             const midY = (startY + endY) / 2
             startY -= Math.round(midY * scaleAdjust)
             endY -= Math.round(midY * scaleAdjust)

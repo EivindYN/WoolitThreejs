@@ -122,13 +122,16 @@ function color_image_mask(canvas: HTMLCanvasElement, imageDataMask: any, color: 
     let imageData = ctx.getImageData(0, 0, w, h * 2)
     let rgb = hexToRgb(color)!!
     for (let i = 0; i < imageData.data.length; i += 4) {
-        let offset = 2
+        let me;
+        let other;
         if (i > imageData.data.length / 2) {
-            offset -= 2
+            me = imageDataMask.data[i] / 255.0
+            other = imageDataMask.data[i + 2] / 255.0
+        } else {
+            me = imageDataMask.data[i + 2] / 255.0
+            other = imageDataMask.data[i] / 255.0
         }
-        let me = imageDataMask.data[i + offset] / 255.0
         let background = imageDataMask.data[i + 1] / 255.0
-        let other = imageDataMask.data[i + (2 - offset)] / 255.0
         let max = Math.max(me, background, other)
         if (max === background) {
             max *= 0.75
