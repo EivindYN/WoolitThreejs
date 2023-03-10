@@ -175,18 +175,26 @@ function drawRepeat(
         const sweaterPartUse = sweaterPart.isArm() ? selectedSweaterPart : sweaterPart
         const scaleArmY = sweaterPartUse.scaleArmY
         const offsetY = sweaterPartUse.offsetY(maskHeight, scaleY)
-        const sign = sweaterPart.isArm() ? -1 : 1
-        if (sweaterPart.isArm()) {
-            startY += offsetY * sign
-            endY += offsetY * sign
-        }
-        const midY = (startY + endY) / 2
-        const scaleAdjust = sweaterPart.isArm() ? 1 - (1 / (1 + (1 - scaleArmY))) : (1 - scaleArmY)
-        startY += Math.round(midY * scaleAdjust) * sign
-        endY += Math.round(midY * scaleAdjust) * sign
         if (!sweaterPart.isArm()) {
-            startY += offsetY * sign
-            endY += offsetY * sign
+            const scaleAdjust = scaleArmY
+            const midY = (startY + endY) / 2
+            startY += Math.round(midY * scaleAdjust)
+            endY += Math.round(midY * scaleAdjust)
+
+            startY += offsetY
+            endY += offsetY
+        } else {
+            startY -= offsetY
+            endY -= offsetY
+
+            const scaleAdjust = scaleArmY / (1 + scaleArmY)
+            // Math: midY = 800 | 1000, scaleArmY = 0.25
+            // 800 * 0.25 = 200
+            // 1000 * 0.25 / 1.25 = 200
+            // 200 = 200, correct inversion
+            const midY = (startY + endY) / 2
+            startY -= Math.round(midY * scaleAdjust)
+            endY -= Math.round(midY * scaleAdjust)
         }
     }
 

@@ -35,7 +35,7 @@ function KnittingPreview(props: any) {
             3826 / 4096,
             4020 / 4096,
             2313 / 4096, //topArmY = 2213, but manually adjusted
-            0.75,
+            0.25, // How much larger in Y the torso must be to align with arms.
         );
 
         let element = document.getElementById('canvas')!!
