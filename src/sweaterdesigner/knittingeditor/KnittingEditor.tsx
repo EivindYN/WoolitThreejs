@@ -57,7 +57,7 @@ function KnittingEditor(props: any) {
             let x = startX + Math.round((endX - startX) * n / numDraw)
             let y = startY + Math.round((endY - startY) * n / numDraw)
             lastPos = [x, y]
-            drawSelection(props.selectedSweaterPart, pattern, x, y, false)
+            drawSelection([props.selectedSweaterPart], pattern, x, y, false)
         }
         setGrid(getGrid())
         setUpdateCanvasNextFrame(props.selectedSweaterPart)

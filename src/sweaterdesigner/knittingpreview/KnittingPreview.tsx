@@ -25,7 +25,16 @@ function KnittingPreview(props: any) {
         }
         // 2128, 1986, 3826, 4025
         let leftArm = new SweaterPart("Left Arm", grid, 371 / 4096, 60 / 4096, 1714 / 4096, 1727 / 4096);
-        let front = new SweaterPart("Front Torso", grid2, 2128 / 4096, 1986 / 4096, 3826 / 4096, 4020 / 4096);
+        let front = new SweaterPart(
+            "Front Torso",
+            grid2,
+            2128 / 4096,
+            1986 / 4096,
+            3826 / 4096,
+            4020 / 4096,
+            2263 / 4096, //topArmY = 2213, but manually adjusted
+            0.75,
+        );
 
         let element = document.getElementById('canvas')!!
 
