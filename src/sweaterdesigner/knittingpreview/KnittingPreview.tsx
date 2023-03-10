@@ -25,7 +25,7 @@ function KnittingPreview(props: any) {
             }
         }
         // 2128, 1986, 3826, 4025
-        let leftArm = new SweaterPart("Left Arm", SweaterPartArea.LeftArm, grid, 371 / 4096, 60 / 4096, 1714 / 4096, 1727 / 4096);
+        let leftArm = new SweaterPart("Left Arm", SweaterPartArea.LeftArm, grid, 371 / 4096, 60 / 4096, 1714 / 4096, 1714 / 4096);
         let front = new SweaterPart(
             "Front Torso",
             SweaterPartArea.FrontTorso,
